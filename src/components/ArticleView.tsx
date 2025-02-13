@@ -8,6 +8,7 @@ interface Article {
   source: string;
   image: string;
   date: string;
+  url: string;  // Add this line
 }
 
 interface ArticleViewProps {
@@ -59,19 +60,26 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
 
           <h1 className="text-2xl font-bold mb-4">{article.title}</h1>
           <div className="prose prose-invert max-w-none">
-            <p className="text-gray-300">{article.summary}</p>
-            {/* Placeholder for the full article content that will come from your API */}
-            <div className="mt-8 p-6 bg-secondary/50 rounded-lg">
-              <p className="text-gray-400 text-sm">
-                This is a placeholder for the AI-generated summary. Your Python
-                API will provide the actual summarized content here.
+            <div className="mt-4 p-4 bg-secondary/50 rounded-lg">
+              <p className="text-gray-300 text-lg">
+                {article.summary}
               </p>
             </div>
           </div>
 
           <div className="mt-8 pt-6 border-t border-gray-700">
             <a
-              href="#"
+              href={article.url || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                if (!article.url) {
+                  e.preventDefault();
+                  console.error('No URL available for this article');
+                } else {
+                  console.log('Opening URL:', article.url);
+                }
+              }}
               className="inline-flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
             >
               <span>Read full article on {article.source}</span>

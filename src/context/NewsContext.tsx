@@ -24,107 +24,29 @@ interface NewsContextType {
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
 
-// Temporary dummy data
-const dummyNews: News[] = [
-  {
-    id: "1",
-    title: "Breaking: Major Tech Companies Announce AI Coalition",
-    summary:
-      "Leading tech giants form partnership to establish ethical AI guidelines...",
-    source: "Tech Daily",
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995",
-    date: "2025-01-15",
-  },
-  {
-    id: "2",
-    title: "Global Climate Summit 2025 Announces Key Initiatives",
-    summary: "World leaders gather to address climate change challenges...",
-    source: "Environmental News",
-    image: "https://images.unsplash.com/photo-1611273426858-450d8e3c9fce",
-    date: "2025-01-15",
-  },
-  {
-    id: "4",
-    title: "New Breakthrough in Quantum Computing Research",
-    summary:
-      "Scientists achieve major milestone in quantum computing development...",
-    source: "Science Weekly",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb",
-    date: "2025-01-15",
-  },
-  {
-    id: "5",
-    title: "New Breakthrough in Quantum Computing Research",
-    summary:
-      "Scientists achieve major milestone in quantum computing development...",
-    source: "Science Weekly",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb",
-    date: "2025-01-15",
-  },
-  {
-    id: "6",
-    title: "New Breakthrough in Quantum Computing Research",
-    summary:
-      "Scientists achieve major milestone in quantum computing development...",
-    source: "Science Weekly",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb",
-    date: "2025-01-15",
-  },
-  {
-    id: "7",
-    title: "New Breakthrough in Quantum Computing Research",
-    summary:
-      "Scientists achieve major milestone in quantum computing development...",
-    source: "Science Weekly",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb",
-    date: "2025-01-15",
-  },
-  {
-    id: "8",
-    title: "New Breakthrough in Quantum Computing Research",
-    summary:
-      "Scientists achieve major milestone in quantum computing development...",
-    source: "Science Weekly",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb",
-    date: "2025-01-15",
-  },
-  {
-    id: "9",
-    title: "New Breakthrough in Quantum Computing Research",
-    summary:
-      "Scientists achieve major milestone in quantum computing development...",
-    source: "Science Weekly",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb",
-    date: "2025-01-15",
-  },
-  {
-    id: "10",
-    title: "New Breakthrough in Quantum Computing Research",
-    summary:
-      "Scientists achieve major milestone in quantum computing development...",
-    source: "Science Weekly",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb",
-    date: "2025-01-15",
-  },
-  {
-    id: "11",
-    title: "New Breakthrough in Quantum Computing Research",
-    summary:
-      "Scientists achieve major milestone in quantum computing development...",
-    source: "Science Weekly",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb",
-    date: "2025-01-15",
-  },
-  {
-    id: "12",
-    title: "New Breakthrough in Quantum Computing Research",
-    summary:
-      "Scientists achieve major milestone in quantum computing development...",
-    source: "Science Weekly",
-    image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb",
-    date: "2025-01-15",
-  },
-];
+const BACKEND_URL = '/summarized_news.json';  // Update to relative path in public folder
+
+const fetchNews = async (): Promise<News[]> => {
+  try {
+    const response = await fetch(BACKEND_URL);
+    if (!response.ok) {
+      throw new Error('Failed to fetch news');
+    }
+    const data = await response.json();
+    return data.map((item: any, index: number) => ({
+      id: String(index + 1),
+      title: item.title,
+      summary: item.summary,
+      source: item.source,
+      image: item.imageUrl,
+      url: item.url, // Make sure this matches your JSON property name
+      date: new Date(item.publishedAt).toISOString().split('T')[0]
+    }));
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    return [];
+  }
+};
 
 export const NewsProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -134,11 +56,15 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate API loading
     const loadNews = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setNews(dummyNews);
-      setLoading(false);
+      try {
+        const newsData = await fetchNews();
+        setNews(newsData);
+      } catch (error) {
+        console.error('Error loading news:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadNews();
