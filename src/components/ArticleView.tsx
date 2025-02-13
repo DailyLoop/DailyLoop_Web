@@ -8,7 +8,8 @@ interface Article {
   source: string;
   image: string;
   date: string;
-  url: string;  // Add this line
+  url: string;
+  author: string;  // Add author field
 }
 
 interface ArticleViewProps {
@@ -47,6 +48,11 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
                 <Clock className="h-4 w-4 mr-2" />
                 {article.date}
               </div>
+              {article.author && (
+                <span className="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-sm">
+                  By {article.author}
+                </span>
+              )}
             </div>
             <div className="flex items-center space-x-4">
               <button className="text-gray-400 hover:text-blue-500 transition-colors">

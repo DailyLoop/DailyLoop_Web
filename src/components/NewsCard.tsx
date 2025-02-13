@@ -5,9 +5,11 @@ interface News {
   id: string;
   title: string;
   summary: string;
+  context: string;
   source: string;
   image: string;
   date: string;
+  url: string;
 }
 
 interface NewsCardProps {
@@ -36,9 +38,10 @@ const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected }) => {
           <h2 className="text-sm font-semibold line-clamp-1">{news.title}</h2>
         </div>
       </div>
+      
       <div className="p-3">
         <p className="text-gray-400 text-xs line-clamp-2 mb-2">
-          {news.summary}
+          {news.context || news.summary}
         </p>
         <div className="flex items-center justify-between text-xs text-gray-400">
           <div className="flex items-center space-x-1">

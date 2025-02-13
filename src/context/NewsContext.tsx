@@ -10,9 +10,12 @@ interface News {
   id: string;
   title: string;
   summary: string;
+  context: string;
   source: string;
   image: string;
   date: string;
+  url: string;
+  author: string;  // Added author field
 }
 
 interface NewsContextType {
@@ -35,12 +38,14 @@ const fetchNews = async (): Promise<News[]> => {
     const data = await response.json();
     return data.map((item: any, index: number) => ({
       id: String(index + 1),
-      title: item.title,
-      summary: item.summary,
-      source: item.source,
-      image: item.imageUrl,
-      url: item.url, // Make sure this matches your JSON property name
-      date: new Date(item.publishedAt).toISOString().split('T')[0]
+      title: item.title || '',
+      summary: item.summary || '',
+      context: item.content || '',  
+      source: item.source || '',
+      image: item.image || item.urlToImage || '',
+      url: item.url || '',
+      date: item.publishedAt ? new Date(item.publishedAt).toISOString().split('T')[0] : '',
+      author: item.author || 'Unknown'  // Added comma here
     }));
   } catch (error) {
     console.error('Error fetching news:', error);
