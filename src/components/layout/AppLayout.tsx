@@ -1,20 +1,19 @@
-import React from 'react';
-import Header from './Header';
-import Sidebar from './Sidebar';
+import React, { ReactNode } from "react";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
 
 interface AppLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
+  onLogoClick: () => void;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ children, onLogoClick }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="bg-primary min-h-screen text-white">
+      <Header onLogoClick={onLogoClick} />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 p-6">
-          {children}
-        </main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );
