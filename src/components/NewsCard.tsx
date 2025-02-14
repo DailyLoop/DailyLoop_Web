@@ -35,12 +35,14 @@ const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 to-transparent" />
         <div className="absolute bottom-2 left-3 right-3">
           <p className="text-xs text-gray-300 mb-1">{news.source}</p>
-          <h2 className="text-sm font-semibold line-clamp-1">{news.title}</h2>
+          <h2 className="text-sm font-['Mencken_Std_Narrow'] font-extrabold line-clamp-1">
+            {news.title}
+          </h2>
         </div>
       </div>
       
       <div className="p-3">
-        <p className="text-gray-400 text-xs line-clamp-2 mb-2">
+        <p className="text-gray-400 text-xs line-clamp-2 mb-2 font-['Shonar_Bangla']">
           {news.context || news.summary}
         </p>
         <div className="flex items-center justify-between text-xs text-gray-400">

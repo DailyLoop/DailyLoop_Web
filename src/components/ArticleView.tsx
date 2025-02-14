@@ -25,7 +25,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
         className="flex items-center space-x-2 text-gray-400 hover:text-blue-500 transition-colors mb-6 md:hidden"
       >
         <ArrowLeft className="h-5 w-5" />
-        <span>Back to Headlines</span>
+        <span className="font-inter">Back to Headlines</span>
       </button>
 
       <article className="bg-primary rounded-xl overflow-hidden">
@@ -41,15 +41,15 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
-              <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm">
+              <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
                 {article.source}
               </span>
-              <div className="flex items-center text-gray-400 text-sm">
+              <div className="flex items-center text-gray-400 text-sm font-inter">
                 <Clock className="h-4 w-4 mr-2" />
                 {article.date}
               </div>
               {article.author && (
-                <span className="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-sm">
+                <span className="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-sm font-medium">
                   By {article.author}
                 </span>
               )}
@@ -64,10 +64,13 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold mb-4">{article.title}</h1>
+          <h1 className="text-3xl mb-6 font-['Mencken_Std_Narrow'] font-extrabold leading-tight">
+            {article.title}
+          </h1>
+
           <div className="prose prose-invert max-w-none">
             <div className="mt-4 p-4 bg-secondary/50 rounded-lg">
-              <p className="text-gray-300 text-lg">
+              <p className="text-gray-300 text-lg leading-relaxed font-['Shonar_Bangla']">
                 {article.summary}
               </p>
             </div>
@@ -86,7 +89,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
                   console.log('Opening URL:', article.url);
                 }
               }}
-              className="inline-flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
+              className="inline-flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors font-inter"
             >
               <span>Read full article on {article.source}</span>
               <ExternalLink className="h-4 w-4" />
