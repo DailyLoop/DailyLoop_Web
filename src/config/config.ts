@@ -4,7 +4,9 @@ export const config = {
         endpoints: {
             fetchNews: '/api/news/fetch',
             processNews: '/api/news/process'
-        }
+        },
+        // summarizedNewsPath: '../news-aggregator/data/summarized/summarized_news.json'  
+        summarizedNewsPath: '/Users/rishabhshah/Desktop/newsfeast/news-aggregator-frontend/public/summarized_news.json'  
     }
 };
 
