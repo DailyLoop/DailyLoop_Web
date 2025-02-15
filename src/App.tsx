@@ -1,21 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AppLayout from "./components/layout/AppLayout";
 import { NewsProvider } from "./context/NewsContext";
 import ArticleThread from "./components/news/ArticleThread";
 import LandingPage from "./components/LandingPage";
 import config from "./config/config";
+import SessionService from "./services/sessionService";
 
 function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [newsData, setNewsData] = useState([]);
 
 
+  useEffect(() => {
+    SessionService.initSession();
+    return () => {
+      SessionService.clearSession();
+    };
+  }, []);
+
   const handleSearch = async (query: string) => {
     try {
       alert("Searching..."); 
 
       // First, fetch news data
-      const fetchResponse = await fetch(`${config.api.baseUrl}${config.api.endpoints.fetchNews}?keyword=${encodeURIComponent(query)}`);
+      const sessionId = SessionService.getSessionId();
+      const fetchResponse = await fetch(`${config.api.baseUrl}${config.api.endpoints.fetchNews}?keyword=${encodeURIComponent(query)}&session_id=${sessionId}`);
       if (!fetchResponse.ok) {
         throw new Error('Failed to fetch news');
       }
@@ -23,7 +32,7 @@ function App() {
 
       // alert("processing now...");
       // Then, process the fetched news
-      const processResponse = await fetch(`${config.api.baseUrl}${config.api.endpoints.processNews}`, {
+      const processResponse = await fetch(`${config.api.baseUrl}${config.api.endpoints.processNews}?session_id=${sessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
