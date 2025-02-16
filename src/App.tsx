@@ -27,9 +27,6 @@ function App() {
     
     try {
 
-      alert("Searching..."); 
-
-
       // First, fetch news data
       const sessionId = SessionService.getSessionId();
       const fetchResponse = await fetch(`${config.api.baseUrl}${config.api.endpoints.fetchNews}?keyword=${encodeURIComponent(query)}&session_id=${sessionId}`);
@@ -55,7 +52,7 @@ function App() {
 
 
       // Update the NewsContext with the processed data
-<!--       window.localStorage.setItem('newsData', JSON.stringify(processedData)); -->
+// <!--       window.localStorage.setItem('newsData', JSON.stringify(processedData)); -->
 
       // Trigger transition animations with proper timing
 
@@ -118,7 +115,6 @@ function App() {
             : 'scale-125 opacity-0 pointer-events-none blur-md transform-gpu'
         } ${isTransitioning ? 'transition-timing-function-ease-in' : ''}`}
       >
-<!--         <NewsProvider> -->
         <NewsProvider newsData={newsData}>
           <AppLayout onLogoClick={handleReset} onSearch={handleSearch}>
             <ArticleThread />

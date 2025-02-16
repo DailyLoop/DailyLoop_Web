@@ -46,8 +46,10 @@ const processNewsData = (data: any[]): News[] => {
     source: item.source || '',
     image: item.image || item.urlToImage || '',
     url: item.url || '',
-    date: item.publishedAt ? new Date(item.publishedAt).toISOString().split('T')[0] : '',
-    author: item.author || 'Unknown'
+    date: item.publishedAt
+      ? new Date(item.publishedAt).toISOString().split("T")[0]
+      : "",
+    author: item.author || "Unknown",
   }));
 };
 
@@ -67,50 +69,36 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({
     setError(null);
 
     try {
-//       const newsData = await fetchNews();
+      // Process the incoming news data
       const processedNews = processNewsData(newsData);
-      
-      
+
       // Start transition out
       setLoading(true);
-      
-      // Wait for transition out animation
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Update data
-//       setNews(newsData);
+
+      // Wait for transition out animation (300ms)
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Update news data
       setNews(processedNews);
-      
-      
+
       // Start transition in
       setLoading(false);
-      
+
       // Clear any existing transition timeout
       if (transitionTimeoutRef.current) {
         clearTimeout(transitionTimeoutRef.current);
       }
-      
-      // Set timeout for transition completion
+
+      // Set timeout for transition completion (500ms)
       transitionTimeoutRef.current = setTimeout(() => {
         setIsTransitioning(false);
       }, 500);
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch news');
+      setError(err instanceof Error ? err.message : "Failed to fetch news");
       setLoading(false);
       setIsTransitioning(false);
     }
-  }, []);
-<!--   useEffect(() => {
-    try {
-//       const processedNews = processNewsData(newsData);
-//       setNews(processedNews);
-    } catch (error) {
-      console.error('Error processing news:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [newsData]); -->
+  }, [newsData]);
 
   useEffect(() => {
     refreshNews();
@@ -130,7 +118,7 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({
         setSelectedArticle,
         isTransitioning,
         error,
-        refreshNews
+        refreshNews,
       }}
     >
       {children}
