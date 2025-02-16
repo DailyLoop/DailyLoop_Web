@@ -4,6 +4,8 @@ import React, {
   ReactNode,
   useState,
   useEffect,
+  useCallback,
+  useRef,
 } from "react";
 
 interface News {
@@ -23,6 +25,9 @@ interface NewsContextType {
   loading: boolean;
   selectedArticle: string | null;
   setSelectedArticle: (id: string | null) => void;
+  isTransitioning: boolean;
+  error: string | null;
+  refreshNews: () => Promise<void>;
 }
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
@@ -52,22 +57,81 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({
 }) => {
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const transitionTimeoutRef = useRef<NodeJS.Timeout>();
 
-  useEffect(() => {
+  const refreshNews = useCallback(async () => {
+    setIsTransitioning(true);
+    setError(null);
+
     try {
+//       const newsData = await fetchNews();
       const processedNews = processNewsData(newsData);
+      
+      
+      // Start transition out
+      setLoading(true);
+      
+      // Wait for transition out animation
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Update data
+//       setNews(newsData);
       setNews(processedNews);
+      
+      
+      // Start transition in
+      setLoading(false);
+      
+      // Clear any existing transition timeout
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+      
+      // Set timeout for transition completion
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsTransitioning(false);
+      }, 500);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch news');
+      setLoading(false);
+      setIsTransitioning(false);
+    }
+  }, []);
+<!--   useEffect(() => {
+    try {
+//       const processedNews = processNewsData(newsData);
+//       setNews(processedNews);
     } catch (error) {
       console.error('Error processing news:', error);
     } finally {
       setLoading(false);
     }
-  }, [newsData]);
+  }, [newsData]); -->
+
+  useEffect(() => {
+    refreshNews();
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, [refreshNews]);
 
   return (
     <NewsContext.Provider
-      value={{ news, loading, selectedArticle, setSelectedArticle }}
+      value={{
+        news,
+        loading,
+        selectedArticle,
+        setSelectedArticle,
+        isTransitioning,
+        error,
+        refreshNews
+      }}
     >
       {children}
     </NewsContext.Provider>
