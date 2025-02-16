@@ -76,8 +76,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSearch }) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`absolute right-3 top-1/2 -translate-y-1/2 bg-primary text-white p-2 rounded-lg 
-              transition-all duration-300 transform-gpu
+            className={`absolute right-3 top-1/2 -translate-y-1/2 bg-secondary text-white p-2 rounded-lg hover:bg-blue-600 transition-all duration-300
               ${isSubmitting ? 
                 'opacity-50 cursor-not-allowed scale-95' : 
                 'hover:bg-secondary hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20'
