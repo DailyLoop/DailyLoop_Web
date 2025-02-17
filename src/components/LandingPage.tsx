@@ -10,6 +10,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSearch }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -28,13 +29,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSearch }) => {
 
     try {
       setIsSubmitting(true);
+      setIsLoading(true);
       await onSearch(query);
       // Keep isSubmitting true to maintain the animation state
       // Parent component (App.tsx) will handle the transition
     } catch (error) {
       console.error('Search error:', error);
       setIsSubmitting(false);
-      setQuery('');
+      setIsLoading(false);
+      setQuery('');      
     }
   };
 
@@ -94,6 +97,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSearch }) => {
         </div>
       </div>
 
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full opacity-30 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      )}
       <style>
         {`
           @keyframes shakeAnimation {
