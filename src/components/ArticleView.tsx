@@ -19,7 +19,7 @@ interface ArticleViewProps {
 
 const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto h-[calc(100vh-2rem)] overflow-y-auto pb-8 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent transition-all duration-300">
       <button
         onClick={onBack}
         className="flex items-center space-x-2 text-gray-400 hover:text-blue-500 transition-colors mb-6 md:hidden"
@@ -28,7 +28,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
         <span className="font-inter">Back to Headlines</span>
       </button>
 
-      <article className="bg-primary rounded-xl overflow-hidden">
+      <article className="bg-primary rounded-xl overflow-hidden mb-6">
         <div className="aspect-video relative">
           <img
             src={article.image}
