@@ -86,7 +86,6 @@ function App() {
         setIsTransitioning(false);
       }, 500);
     }, 300);
-
   };
 
   return (
@@ -106,7 +105,7 @@ function App() {
         } ${isTransitioning ? 'transition-timing-function-ease-out' : ''}`}
       >
         <LandingPage onSearch={handleSearch} />
-      </div>gjb
+      </div>
 
       <div
         className={`transition-all duration-1000 ease-in-out absolute inset-0 bg-gray-900 ${

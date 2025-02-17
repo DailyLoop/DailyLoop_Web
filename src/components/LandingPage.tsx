@@ -1,6 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 
+const loadingMessages = [
+  "Loading... Because good things take time (and bad code takes longer).",
+  "Hang tight! We're making it look like we're working hard.",
+  "Loading... If only real life had progress bars.",
+  "Fetching data... or maybe just grabbing a coffee.",
+  "Initializing magic... and hoping for no errors.",
+  "Loading… 99% done. Just kidding, we have no idea.",
+  "Patience is a virtue... and also required here.",
+  "Processing request… This is where we pretend to be busy.",
+  "Powering up... Like a slow laptop on a Monday.",
+  "Loading assets… because we don't believe in minimalism.",
+  "Crunching numbers… or just randomly guessing.",
+  "Warming up the engines… and your expectations.",
+  "Getting things ready… but honestly, we're stalling.",
+  "Connecting to the matrix… Please don't pick the red pill.",
+  "Loading at the speed of light… If light had traffic jams.",
+  "Finalizing setup... AKA, thinking about lunch.",
+  "BRB, making things awesome… or at least functional.",
+  "Unleashing the magic… or debugging the chaos.",
+  "Hold on tight! We're working on it... probably.",
+  "Syncing data… and regretting not backing up first."
+];
+
 interface LandingPageProps {
   onSearch: (query: string) => void;
 }
@@ -11,11 +34,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSearch }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLoading) {
+      interval = setInterval(() => {
+        setCurrentMessageIndex((prevIndex) => 
+          prevIndex === loadingMessages.length - 1 ? 0 : prevIndex + 1
+        );
+      }, 3000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,15 +136,83 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSearch }) => {
       </div>
 
       {isLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-50">
+          <div className="relative mb-4">
             <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-400 rounded-full opacity-30 animate-pulse"></div>
             </div>
           </div>
+          <div className="relative h-36 overflow-hidden w-full max-w-md">
+            <div 
+              key={`prev-${(currentMessageIndex === 0 ? loadingMessages.length - 1 : currentMessageIndex - 1)}`}
+              className="text-gray-400 text-sm font-inter text-center px-4 absolute w-full transition-all duration-1000 ease-in-out opacity-30 transform"
+              style={{
+                top: '30%',
+                transform: 'translateY(-50%) scale(0.95)',
+                filter: 'blur(1px)',
+                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              {loadingMessages[currentMessageIndex === 0 ? loadingMessages.length - 1 : currentMessageIndex - 1]}
+            </div>
+            <div 
+              key={`current-${currentMessageIndex}`}
+              className="text-white text-xl font-inter font-medium text-center px-4 absolute w-full transition-all duration-1000 ease-in-out transform shadow-lg"
+              style={{
+                top: '50%',
+                transform: 'translateY(-50%) scale(1)',
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              {loadingMessages[currentMessageIndex]}
+            </div>
+            <div 
+              key={`next-${(currentMessageIndex === loadingMessages.length - 1 ? 0 : currentMessageIndex + 1)}`}
+              className="text-gray-400 text-sm font-inter text-center px-4 absolute w-full transition-all duration-1000 ease-in-out opacity-30 transform"
+              style={{
+                top: '70%',
+                transform: 'translateY(-50%) scale(0.95)',
+                filter: 'blur(1px)',
+                transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              {loadingMessages[currentMessageIndex === loadingMessages.length - 1 ? 0 : currentMessageIndex + 1]}
+            </div>
+          </div>
         </div>
       )}
+      <style>
+        {`
+          @keyframes shakeAnimation {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+          }
+          .shake {
+            animation: shakeAnimation 0.3s ease-in-out;
+          }
+          @keyframes slideUp {
+            0% {
+              transform: translateY(100%);
+              opacity: 0;
+            }
+            10% {
+              transform: translateY(-50%);
+              opacity: 1;
+            }
+            90% {
+              transform: translateY(-50%);
+              opacity: 1;
+            }
+            100% {
+              transform: translateY(-200%);
+              opacity: 0;
+            }
+          }
+        `}
+      </style>
       <style>
         {`
           @keyframes shakeAnimation {
