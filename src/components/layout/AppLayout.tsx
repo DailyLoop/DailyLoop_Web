@@ -34,7 +34,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, onLogoClick, onSearch }
       }`}
     >
       <div className="animate-fadeIn">
-        <Header onLogoClick={onLogoClick} />
+        <Header onLogoClick={onLogoClick} onSearch={onSearch} />
         <div className="flex">
           <div 
             className={`transition-all duration-700 ease-out transform ${

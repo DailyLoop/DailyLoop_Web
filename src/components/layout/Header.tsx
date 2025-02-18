@@ -4,9 +4,10 @@ import SearchBar from "../common/SearchBar";
 
 interface HeaderProps {
   onLogoClick: () => void;
+  onSearch: (query: string) => Promise<void>;  // Add onSearch prop
 }
 
-const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
+const Header: React.FC<HeaderProps> = ({ onLogoClick, onSearch }) => {
   return (
     <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur supports-[backdrop-filter]:bg-secondary/75 border-b border-secondary/50 transition-all duration-300 ease-in-out">
       <div className="container mx-auto px-4 py-4">
@@ -18,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ onLogoClick }) => {
             <Newspaper className="h-8 w-8 text-blue-500 transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:rotate-[-8deg]" />
             <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-400 transition-colors duration-300 ease-in-out group-hover:from-blue-400 group-hover:to-blue-300">NewsFlow</h1>
           </button>
-          <SearchBar />
+          <SearchBar onSearch={onSearch} />
         </div>
       </div>
     </header>
