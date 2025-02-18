@@ -1,12 +1,18 @@
+// src/components/common/SearchBar.tsx
 import React, { useState } from "react";
 import { Search } from "lucide-react";
 
-const SearchBar: React.FC = () => {
+interface SearchBarProps {
+  onSearch: (query: string) => void;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   const [query, setQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Implement search logic
+    if (!query.trim()) return;
+    onSearch(query);
   };
 
   return (
