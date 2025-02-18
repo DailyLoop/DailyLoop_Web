@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from "react";
 
-interface News {
+export interface News {
   id: string;
   title: string;
   summary: string;
@@ -28,6 +28,7 @@ interface NewsContextType {
   isTransitioning: boolean;
   error: string | null;
   refreshNews: () => Promise<void>;
+  resetNews: () => void;
 }
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
@@ -64,32 +65,24 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const transitionTimeoutRef = useRef<NodeJS.Timeout>();
 
+  // Function to refresh the news from incoming data (e.g., after a search)
   const refreshNews = useCallback(async () => {
     setIsTransitioning(true);
     setError(null);
-
     try {
-      // Process the incoming news data
+      // Process the raw newsData into the shape we need
       const processedNews = processNewsData(newsData);
-
-      // Start transition out
       setLoading(true);
-
-      // Wait for transition out animation (300ms)
+      // Wait for a transition-out animation (simulate with 300ms delay)
       await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Update news data
+      // Update our news state with the processed data
       setNews(processedNews);
-
-      // Start transition in
       setLoading(false);
-
-      // Clear any existing transition timeout
+      // Clear any existing transition timeout if needed
       if (transitionTimeoutRef.current) {
         clearTimeout(transitionTimeoutRef.current);
       }
-
-      // Set timeout for transition completion (500ms)
+      // Simulate transition completion after 500ms
       transitionTimeoutRef.current = setTimeout(() => {
         setIsTransitioning(false);
       }, 500);
@@ -100,6 +93,7 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({
     }
   }, [newsData]);
 
+  // Refresh news whenever newsData changes
   useEffect(() => {
     refreshNews();
     return () => {
@@ -109,6 +103,12 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({
     };
   }, [refreshNews]);
 
+  // NEW: Reset function to clear news and selected article
+  const resetNews = () => {
+    setNews([]);
+    setSelectedArticle(null);
+  };
+  
   return (
     <NewsContext.Provider
       value={{
@@ -119,6 +119,7 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({
         isTransitioning,
         error,
         refreshNews,
+        resetNews,
       }}
     >
       {children}
