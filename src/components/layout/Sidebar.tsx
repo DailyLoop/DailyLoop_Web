@@ -6,6 +6,12 @@ import { Filter } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   const { news, loading, selectedArticle, setSelectedArticle } = useNewsContext();
+  
+  // Extract unique filter keywords from news data
+  const filterKeywords = React.useMemo(() => {
+    const keywords = news.flatMap(item => item.filter_keywords || []);
+    return Array.from(new Set(keywords));
+  }, [news]);
 
   return (
     <aside className="w-[400px] border-r border-gray-800/50 h-[calc(100vh-73px)] sticky top-[73px] backdrop-blur-sm transition-all duration-300 ease-in-out">
@@ -18,7 +24,7 @@ const Sidebar: React.FC = () => {
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
-          {['Breaking News', 'Technology', 'Politics', 'Business'].map((filter) => (
+          {filterKeywords.map((filter) => (
             <button
               key={filter}
               className="px-3 py-1.5 bg-gray-800/70 hover:bg-gray-700/70 rounded-full text-sm text-gray-300 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg hover:shadow-blue-500/10 transform hover:-translate-y-0.5"
