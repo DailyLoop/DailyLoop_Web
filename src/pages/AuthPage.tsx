@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState(''); // New state for Display Name
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
@@ -16,7 +17,10 @@ const AuthPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+    if (
+      !import.meta.env.VITE_SUPABASE_URL ||
+      !import.meta.env.VITE_SUPABASE_ANON_KEY
+    ) {
       toast.error(
         'Please connect to Supabase first using the "Connect to Supabase" button in the top right corner.'
       );
@@ -30,9 +34,15 @@ const AuthPage: React.FC = () => {
         await signIn(email, password);
         toast.success('Welcome back!');
       } else {
+        // Create account - include displayName in user metadata
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              display_name: displayName,
+            },
+          },
         });
         if (error) throw error;
         toast.success('Account created! Please check your email to confirm and then sign in.');
@@ -118,6 +128,24 @@ const AuthPage: React.FC = () => {
                 required
               />
             </div>
+
+            {/* Only show the Display Name field when creating an account */}
+            {!isLogin && (
+              <div>
+                <label htmlFor="displayName" className="block text-sm font-medium text-gray-300 mb-2">
+                  Display Name
+                </label>
+                <input
+                  id="displayName"
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
+                  placeholder="Enter your display name"
+                  required
+                />
+              </div>
+            )}
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
