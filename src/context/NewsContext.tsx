@@ -18,6 +18,7 @@ export interface News {
   date: string;
   url: string;
   author: string;
+  filter_keywords?: string[];
 }
 
 interface NewsContextType {
@@ -51,6 +52,7 @@ const processNewsData = (data: any[]): News[] => {
       ? new Date(item.publishedAt).toISOString().split("T")[0]
       : "",
     author: item.author || "Unknown",
+    filter_keywords: item.filter_keywords || []
   }));
 };
 
