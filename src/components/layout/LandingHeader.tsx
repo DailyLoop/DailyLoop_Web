@@ -37,7 +37,7 @@ const LandingHeader: React.FC<LandingHeaderProps> = ({ onLogoClick }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur supports-[backdrop-filter]:bg-secondary/75 border-b border-secondary/50 transition-all duration-300 ease-in-out">
+    <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur supports-[backdrop-filter]:bg-secondary border-b border-secondary/50 transition-all duration-300 ease-in-out">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <button

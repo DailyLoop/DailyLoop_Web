@@ -25,7 +25,7 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);  // Add this line
+  const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<Profile>({
     id: '',
     email: '',
@@ -37,19 +37,19 @@ const ProfilePage: React.FC = () => {
     preference: {},
   });
 
+  // Navigate home when logo is clicked
   const handleLogoClick = () => {
     navigate('/');
   };
 
-  // Fetch profile data when the component mounts or user changes
+  // Fetch profile when the user changes or mounts
   useEffect(() => {
     if (user) {
-      console.log('Authenticated user:', user);
       fetchProfile();
     }
   }, [user]);
 
-  // Fetch the profile using maybeSingle() so that it returns null if not found
+  // Fetch profile data from Supabase using maybeSingle()
   async function fetchProfile() {
     setLoading(true);
     setError(null);
@@ -60,13 +60,12 @@ const ProfilePage: React.FC = () => {
         .eq('id', user?.id)
         .maybeSingle();
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       if (!data) {
+        // If no profile exists, create one and upsert it
         const newProfile: Profile = {
-          id: user!.id, 
+          id: user!.id,
           email: user!.email || '',
           display_name: '',
           avatar_url: '',
@@ -75,9 +74,7 @@ const ProfilePage: React.FC = () => {
           location: '',
           preference: {},
         };
-        
-        console.log('New profile data to upsert:', newProfile);
-        
+
         const { error: upsertError } = await supabase.from('profiles').upsert(newProfile);
         if (upsertError) throw upsertError;
         setProfile(newProfile);
@@ -91,7 +88,7 @@ const ProfilePage: React.FC = () => {
     }
   }
 
-  // Update the profile in Supabase
+  // Update profile data in Supabase
   async function updateProfile(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -121,7 +118,7 @@ const ProfilePage: React.FC = () => {
     }
   }
 
-  // Handle input changes
+  // Update state when an input changes
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
     setProfile((prev) => ({
@@ -131,18 +128,23 @@ const ProfilePage: React.FC = () => {
   }
 
   if (!user) {
-    return <div className="p-4 text-center">Please sign in to view your profile.</div>;
+    return <div className="p-4 text-center text-white">Please sign in to view your profile.</div>;
   }
 
+  // Common input styling for ease of maintenance
+  const inputClasses = `w-full p-2 rounded border border-gray-700 bg-primary text-white transition duration-200 ${
+    isEditing ? 'focus:outline-none focus:ring-2 focus:ring-blue-500' : 'cursor-not-allowed'
+  }`;
+
   return (
-    <div className="bg-gray-900 min-h-screen">
+    <div className="bg-primary min-h-screen">
       <LandingHeader onLogoClick={handleLogoClick} />
       <div className="max-w-md mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-white">My Profile</h1>
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition duration-200"
+            className="px-4 py-2 bg-secondary hover:bg-gray-600 text-white rounded-md transition duration-200"
           >
             {isEditing ? 'Cancel' : 'Edit Profile'}
           </button>
@@ -152,8 +154,8 @@ const ProfilePage: React.FC = () => {
         {loading ? (
           <div className="text-white">Loading...</div>
         ) : (
-          <div className="bg-gray-800 rounded-lg shadow-lg p-6">
-            {/* Avatar preview with fallback to letter */}
+          <div className="bg-secondary rounded-lg shadow-lg p-6">
+            {/* Avatar Preview */}
             <div className="flex justify-center mb-6">
               {profile.avatar_url ? (
                 <img
@@ -164,22 +166,18 @@ const ProfilePage: React.FC = () => {
               ) : (
                 <div className="h-24 w-24 rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-600">
                   <span className="text-white text-3xl font-semibold">
-                    {profile.display_name && profile.display_name[0] 
-                      ? profile.display_name[0].toUpperCase()
-                      : profile.email && profile.email[0]
-                        ? profile.email[0].toUpperCase()
-                        : '?'}
+                    {profile.display_name?.[0]?.toUpperCase() ||
+                      profile.email?.[0]?.toUpperCase() ||
+                      '?'}
                   </span>
                 </div>
               )}
             </div>
 
             <form onSubmit={updateProfile} className="space-y-5">
-              {/* Form fields with readonly toggle */}
+              {/* Email Field */}
               <div>
-                <label className="block mb-1 font-semibold text-gray-200">
-                  Email (read-only)
-                </label>
+                <label className="block mb-1 font-semibold text-gray-200">Email (read-only)</label>
                 <input
                   type="text"
                   name="email"
@@ -189,99 +187,72 @@ const ProfilePage: React.FC = () => {
                 />
               </div>
 
-              {/* Display Name */}
+              {/* Display Name Field */}
               <div>
-                <label className="block mb-1 font-semibold text-gray-200">
-                  Display Name
-                </label>
+                <label className="block mb-1 font-semibold text-gray-200">Display Name</label>
                 <input
                   type="text"
                   name="display_name"
                   value={profile.display_name}
                   onChange={handleChange}
                   readOnly={!isEditing}
-                  className={`w-full p-2 rounded border border-gray-700 bg-gray-700 text-gray-300 ${
-                    isEditing
-                      ? 'focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      : 'cursor-not-allowed'
-                  }`}
+                  className={inputClasses}
                 />
               </div>
 
-              {/* Other fields follow the same pattern - add readOnly={!isEditing} */}
-              {/* Avatar URL */}
+              {/* Avatar URL Field */}
               <div>
-                <label className="block mb-1 font-semibold text-gray-200">
-                  Avatar URL
-                </label>
+                <label className="block mb-1 font-semibold text-gray-200">Avatar URL</label>
                 <input
                   type="text"
                   name="avatar_url"
                   value={profile.avatar_url}
                   onChange={handleChange}
                   readOnly={!isEditing}
-                  className={`w-full p-2 rounded border border-gray-700 bg-gray-700 text-gray-300 ${
-                    isEditing
-                      ? 'focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      : 'cursor-not-allowed'
-                  }`}
+                  className={inputClasses}
                 />
               </div>
-              {/* Bio */}
+
+              {/* Bio Field */}
               <div>
-                <label className="block mb-1 font-semibold text-gray-200">
-                  Bio
-                </label>
+                <label className="block mb-1 font-semibold text-gray-200">Bio</label>
                 <textarea
                   name="bio"
                   value={profile.bio}
                   onChange={handleChange}
                   readOnly={!isEditing}
                   rows={3}
-                  className={`w-full p-2 rounded border border-gray-700 bg-gray-700 text-gray-300 ${
-                    isEditing
-                      ? 'focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      : 'cursor-not-allowed'
-                  }`}
+                  className={inputClasses}
                 />
               </div>
-              {/* Website */}
+
+              {/* Website Field */}
               <div>
-                <label className="block mb-1 font-semibold text-gray-200">
-                  Website
-                </label>
+                <label className="block mb-1 font-semibold text-gray-200">Website</label>
                 <input
                   type="text"
                   name="website"
                   value={profile.website}
                   onChange={handleChange}
                   readOnly={!isEditing}
-                  className={`w-full p-2 rounded border border-gray-700 bg-gray-700 text-gray-300 ${
-                    isEditing
-                      ? 'focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      : 'cursor-not-allowed'
-                  }`}
+                  className={inputClasses}
                 />
               </div>
-              {/* Location */}
+
+              {/* Location Field */}
               <div>
-                <label className="block mb-1 font-semibold text-gray-200">
-                  Location
-                </label>
+                <label className="block mb-1 font-semibold text-gray-200">Location</label>
                 <input
                   type="text"
                   name="location"
                   value={profile.location}
                   onChange={handleChange}
                   readOnly={!isEditing}
-                  className={`w-full p-2 rounded border border-gray-700 bg-gray-700 text-gray-300 ${
-                    isEditing
-                      ? 'focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      : 'cursor-not-allowed'
-                  }`}
+                  className={inputClasses}
                 />
               </div>
-              {/* Submit Button - only show when editing */}
+
+              {/* Update Button (visible only when editing) */}
               {isEditing && (
                 <button 
                   type="submit" 
