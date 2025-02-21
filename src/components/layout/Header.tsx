@@ -1,14 +1,30 @@
 // src/components/layout/Header.tsx
-import React from "react";
-import { Newspaper } from "lucide-react";
+import React, { useState } from "react";
+import { Newspaper, LogOut, User } from "lucide-react";
 import SearchBar from "../common/SearchBar";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 interface HeaderProps {
   onLogoClick: () => void;
-  onSearch: (query: string) => void;  // NEW
+  onSearch: (query: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ onLogoClick, onSearch }) => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success('Signed out successfully');
+    } catch (error) {
+      toast.error('Error signing out');
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-secondary/95 backdrop-blur supports-[backdrop-filter]:bg-secondary/75 border-b border-secondary/50 transition-all duration-300 ease-in-out">
       <div className="container mx-auto px-4 py-4">
@@ -22,8 +38,47 @@ const Header: React.FC<HeaderProps> = ({ onLogoClick, onSearch }) => {
               NewsFlow
             </h1>
           </button>
-          {/* Pass onSearch prop to the SearchBar */}
-          <SearchBar onSearch={onSearch} />
+          
+          <div className="flex items-center space-x-6">
+            <SearchBar onSearch={onSearch} />
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center hover:bg-blue-600 transition-colors duration-300"
+              >
+                <span className="text-white text-lg font-semibold">
+                  {user?.email?.[0].toUpperCase()}
+                </span>
+              </button>
+
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-secondary border border-gray-700">
+                  <div className="py-1">
+                    <button
+                      className="w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 flex items-center space-x-2"
+                      onClick={() => {
+                        navigate('/profile');
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      <User className="h-4 w-4" />
+                      <span>Profile</span>
+                    </button>
+                    <button
+                      className="w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 flex items-center space-x-2"
+                      onClick={() => {
+                        handleSignOut();
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </header>
