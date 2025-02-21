@@ -1,11 +1,12 @@
 // src/App.tsx
+
 import React from "react";
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
-import NewsApp from './pages/NewsApp';
-import AuthPage from './pages/AuthPage';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import NewsApp from "./pages/NewsApp";
+import AuthPage from "./pages/AuthPage";
+import ProfilePage from "./pages/ProfilePage";
 import LoadingState from "./components/common/LoadingState";
-import { Toaster } from 'react-hot-toast';
 
 function App() {
   const { user, loading } = useAuth();
@@ -20,11 +21,14 @@ function App() {
 
   return (
     <>
-      <Toaster position="top-center" />
       <Routes>
         <Route
           path="/auth"
           element={user ? <Navigate to="/" replace /> : <AuthPage />}
+        />
+        <Route
+          path="/profile"
+          element={user ? <ProfilePage /> : <Navigate to="/auth" replace />}
         />
         <Route
           path="/*"

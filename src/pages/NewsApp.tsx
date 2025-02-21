@@ -6,8 +6,11 @@ import LandingPage from '../components/LandingPage';
 import LoadingState from '../components/common/LoadingState';
 import config from '../config/config';
 import SessionService from '../services/sessionService';
+import { useAuth } from '../context/AuthContext'; // Import Auth context
 
 const NewsApp: React.FC = () => {
+  const { user } = useAuth(); // Get the current user
+
   const [hasSearched, setHasSearched] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +35,8 @@ const NewsApp: React.FC = () => {
   };
 
   const toggleKeyword = (keyword: string) => {
-    setSelectedKeywords(prev => 
-      prev.includes(keyword) 
+    setSelectedKeywords(prev =>
+      prev.includes(keyword)
         ? prev.filter(k => k !== keyword)
         : [...prev, keyword]
     );
@@ -57,22 +60,27 @@ const NewsApp: React.FC = () => {
 
     try {
       const sessionId = SessionService.getSessionId();
-      const fetchResponse = await fetch(
-        `${config.api.baseUrl}${config.api.endpoints.fetchNews}?keyword=${encodeURIComponent(
-          finalQuery
-        )}&session_id=${sessionId}`
-      );
+      const userId = user?.id; // Get the current user's ID
+
+      // Build the fetch URL including keyword, session_id, and user_id (if available)
+      const fetchUrl = `${config.api.baseUrl}${config.api.endpoints.fetchNews}?keyword=${encodeURIComponent(finalQuery)}&session_id=${sessionId}${userId ? `&user_id=${userId}` : ''}`;
+
+      const fetchResponse = await fetch(fetchUrl);
       if (!fetchResponse.ok) {
         throw new Error("Failed to fetch news");
       }
-      const fetchedData = await fetchResponse.json();
+      // We don't actually need to use the fetched data here,
+      // because the fetch endpoint stores articles in the DB using session_id.
+      await fetchResponse.json();
 
+      // Call the process endpoint with session_id only,
+      // so that it only processes (summarizes) articles fetched in this session.
       const processResponse = await fetch(
         `${config.api.baseUrl}${config.api.endpoints.processNews}?session_id=${sessionId}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: fetchedData }),
+          headers: { "Content-Type": "application/json" }
+          // Removed body: JSON.stringify({ data: fetchedData })
         }
       );
       if (!processResponse.ok) {

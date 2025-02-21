@@ -1,20 +1,29 @@
+// src/pages/AuthPage.tsx
+
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { Newspaper, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState(''); // New state for Display Name
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      toast.error('Please connect to Supabase first using the "Connect to Supabase" button in the top right corner.');
+
+    if (
+      !import.meta.env.VITE_SUPABASE_URL ||
+      !import.meta.env.VITE_SUPABASE_ANON_KEY
+    ) {
+      toast.error(
+        'Please connect to Supabase first using the "Connect to Supabase" button in the top right corner.'
+      );
       return;
     }
 
@@ -25,17 +34,29 @@ const AuthPage: React.FC = () => {
         await signIn(email, password);
         toast.success('Welcome back!');
       } else {
-        await signUp(email, password);
-        toast.success('Account created successfully!');
+        // Create account - include displayName in user metadata
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              display_name: displayName,
+            },
+          },
+        });
+        if (error) throw error;
+        toast.success('Account created! Please check your email to confirm and then sign in.');
       }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'An error occurred');
+    } catch (error: any) {
+      toast.error(error.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  const showSupabaseWarning = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const showSupabaseWarning =
+    !import.meta.env.VITE_SUPABASE_URL ||
+    !import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   return (
     <div className="min-h-screen bg-gray-900 flex">
@@ -91,7 +112,7 @@ const AuthPage: React.FC = () => {
               </div>
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
@@ -107,7 +128,25 @@ const AuthPage: React.FC = () => {
                 required
               />
             </div>
-            
+
+            {/* Only show the Display Name field when creating an account */}
+            {!isLogin && (
+              <div>
+                <label htmlFor="displayName" className="block text-sm font-medium text-gray-300 mb-2">
+                  Display Name
+                </label>
+                <input
+                  id="displayName"
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
+                  placeholder="Enter your display name"
+                  required
+                />
+              </div>
+            )}
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
                 Password
@@ -144,7 +183,9 @@ const AuthPage: React.FC = () => {
                 onClick={() => setIsLogin(!isLogin)}
                 className="text-blue-400 hover:text-blue-300 transition-colors text-sm"
               >
-                {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+                {isLogin
+                  ? "Don't have an account? Sign up"
+                  : 'Already have an account? Sign in'}
               </button>
             </div>
           </form>
