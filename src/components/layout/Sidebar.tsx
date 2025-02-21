@@ -64,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside className="w-[400px] border-r border-gray-800/50 h-[calc(100vh-73px)] sticky top-[73px] backdrop-blur-sm transition-all duration-300 ease-in-out">
-      <div className="p-4 border-b border-gray-800/50 backdrop-blur-sm bg-gray-900/50 transition-colors duration-300">
+      <div className="p-4 border-b border-gray-800/50 backdrop-blur-sm transition-colors duration-300">
         {/* Header row with "Latest News" | toggle | "Filtering" */}
         <div className="flex items-center justify-between mb-4">
           {/* Left side can be blank or contain something else if desired */}

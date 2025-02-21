@@ -4,12 +4,19 @@ import ArticleView from "../ArticleView";
 
 const ArticleThread: React.FC = () => {
   const { selectedArticle, setSelectedArticle, news } = useNewsContext();
+
+  React.useEffect(() => {
+    if (news.length > 0 && !selectedArticle) {
+      setSelectedArticle(news[0].id);
+    }
+  }, [news, selectedArticle, setSelectedArticle]);
+
   const article = news.find((n) => n.id === selectedArticle);
 
-  if (!selectedArticle || !article) {
+  if (!article) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-73px)]">
-        <p className="text-gray-400">Select an article to read</p>
+        <p className="text-gray-400">Loading article...</p>
       </div>
     );
   }

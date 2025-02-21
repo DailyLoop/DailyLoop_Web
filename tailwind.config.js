@@ -24,11 +24,16 @@ export default {
           '0%': { transform: 'translateX(-20px)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
         },
+        'wave-pulse': {
+          '0%, 100%': { opacity: 0.4 },
+          '50%': { opacity: 0.7 },
+        },
       },
       animation: {
         fadeIn: 'fadeIn 0.5s ease-out',
         scaleIn: 'scaleIn 0.6s ease-out',
         slideIn: 'slideIn 0.4s ease-out',
+        'wave-pulse': 'wave-pulse 4s ease-in-out infinite',
       },
       transitionTimingFunction: {
         'bounce-in': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',

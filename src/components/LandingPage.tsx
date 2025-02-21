@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
+import { Waves } from "./ui/waves-background";
 import LandingHeader from "./layout/LandingHeader";
 
 const loadingMessages = [
@@ -88,9 +89,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="min-h-screen bg-primary overflow-hidden">
+    <div className="min-h-screen bg-primary overflow-hidden relative">
+      <Waves
+        lineColor="rgba(255, 255, 255, 0.1)"
+        backgroundColor="transparent"
+        waveSpeedX={0.02}
+        waveSpeedY={0.01}
+        waveAmpX={40}
+        waveAmpY={20}
+        friction={0.9}
+        tension={0.01}
+        maxCursorMove={120}
+        xGap={12}
+        yGap={36}
+        className="z-0"
+      />
       <LandingHeader onLogoClick={handleLogoClick} />
-      <div className="flex items-center justify-center px-4 min-h-[calc(100vh-73px)]">
+      <div className="flex items-center justify-center px-4 min-h-[calc(100vh-73px)] relative z-10">
         <div className={`w-full max-w-2xl text-center transition-all duration-1000 ease-out transform-gpu ${
           !isVisible ? 'opacity-0 translate-y-8' :
           isSubmitting ? 'scale-95 opacity-0 translate-y-4' : 
