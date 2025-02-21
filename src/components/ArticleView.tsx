@@ -1,6 +1,9 @@
-import React from "react";
+// src/components/ArticleView.tsx
+import React, { useState } from "react";
 import { ArrowLeft, Bookmark, Share2, Clock, ExternalLink } from "lucide-react";
 import { Waves } from "./ui/waves-background";
+import { useAuth } from "../context/AuthContext";
+import { addBookmark, removeBookmark } from "../services/bookmarkService";
 
 interface Article {
   id: string;
@@ -10,7 +13,8 @@ interface Article {
   image: string;
   date: string;
   url: string;
-  author: string;  // Add author field
+  author: string; // Added author field
+  bookmarkId?: string; // Optional bookmark id if already bookmarked
 }
 
 interface ArticleViewProps {
@@ -19,6 +23,36 @@ interface ArticleViewProps {
 }
 
 const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
+  const { user, token } = useAuth();
+  // Initialize bookmark state based on the article prop (if provided)
+  const [isBookmarked, setIsBookmarked] = useState(!!article.bookmarkId);
+  const [bookmarkId, setBookmarkId] = useState<string | null>(article.bookmarkId || null);
+  const [loading, setLoading] = useState(false);
+
+  const handleBookmarkClick = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent other click events from firing
+    if (!user || !token) return; // Ensure the user is authenticated
+
+    setLoading(true);
+    try {
+      if (isBookmarked) {
+        // If already bookmarked, remove the bookmark.
+        await removeBookmark(bookmarkId as string, token);
+        setIsBookmarked(false);
+        setBookmarkId(null);
+      } else {
+        // If not bookmarked, add the bookmark.
+        const data = await addBookmark(user.id, article.id, token);
+        // Assuming the API returns the created bookmark's id in data.data.id
+        setIsBookmarked(true);
+        setBookmarkId(data.data.id);
+      }
+    } catch (error) {
+      console.error("Bookmark error:", error);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="relative min-h-screen bg-primary">
       <Waves
@@ -71,8 +105,15 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
                 )}
               </div>
               <div className="flex items-center space-x-4">
-                <button className="text-gray-400 hover:text-blue-500 transition-colors">
-                  <Bookmark className="h-5 w-5" />
+                {/* Bookmark Button with toggle functionality */}
+                <button
+                  onClick={handleBookmarkClick}
+                  disabled={loading}
+                  className="transition-colors duration-300"
+                >
+                  <Bookmark
+                    className={`h-5 w-5 ${isBookmarked ? "text-blue-500" : "text-gray-400"}`}
+                  />
                 </button>
                 <button className="text-gray-400 hover:text-blue-500 transition-colors">
                   <Share2 className="h-5 w-5" />
@@ -94,15 +135,15 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
 
             <div className="mt-8 pt-6 border-t border-gray-700">
               <a
-                href={article.url || '#'}
+                href={article.url || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => {
                   if (!article.url) {
                     e.preventDefault();
-                    console.error('No URL available for this article');
+                    console.error("No URL available for this article");
                   } else {
-                    console.log('Opening URL:', article.url);
+                    console.log("Opening URL:", article.url);
                   }
                 }}
                 className="inline-flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors font-inter"

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import LandingHeader from '../components/layout/LandingHeader';
+import AppHeader from '../components/layout/AppHeader';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Waves } from '../components/ui/waves-background';
@@ -154,7 +154,7 @@ const ProfilePage: React.FC = () => {
         className="z-0"
       />
       <div className="relative z-10">
-        <LandingHeader onLogoClick={handleLogoClick} />
+        <AppHeader onLogoClick={handleLogoClick} mode="app" onSearch={() => {}} />
         <div className="max-w-md mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-white">My Profile</h1>

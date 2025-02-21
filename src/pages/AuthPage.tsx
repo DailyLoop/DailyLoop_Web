@@ -1,18 +1,20 @@
 // src/pages/AuthPage.tsx
-
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Newspaper, Loader2, AlertCircle, Mail, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { Waves } from '../components/ui/waves-background';
+import { useNavigate } from 'react-router-dom';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
-  const [displayName, setDisplayName] = useState(''); // New state for Display Name
+  const [displayName, setDisplayName] = useState(''); // For Sign Up mode
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, signUp } = useAuth(); // If you have a signUp method in your context
+  const navigate = useNavigate();
 
   const validateForm = () => {
     if (!email.trim()) {
@@ -48,21 +50,24 @@ const AuthPage: React.FC = () => {
 
     try {
       if (isLogin) {
+        // Attempt to sign in
         await signIn(email, password);
         toast.success('Welcome back!');
+        // Redirect to landing page after successful sign in
+        navigate("/");
       } else {
-        // Create account - include displayName in user metadata
+        // Attempt to sign up using Supabase directly (or you can use signUp from your context)
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: {
-              display_name: displayName,
-            },
+            data: { display_name: displayName },
           },
         });
         if (error) throw error;
         toast.success('Account created! Please check your email to confirm and then sign in.');
+        // Switch to login mode after sign up
+        setIsLogin(true);
       }
     } catch (error: any) {
       const message = error.message || 'An error occurred';
@@ -83,9 +88,23 @@ const AuthPage: React.FC = () => {
     !import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   return (
-    <div className="min-h-screen bg-gray-900 flex">
+    <div className="min-h-screen bg-gray-900 flex relative">
+      <Waves
+        lineColor="rgba(255, 255, 255, 0.1)"
+        backgroundColor="transparent"
+        waveSpeedX={0.02}
+        waveSpeedY={0.01}
+        waveAmpX={40}
+        waveAmpY={20}
+        friction={0.9}
+        tension={0.01}
+        maxCursorMove={120}
+        xGap={12}
+        yGap={36}
+        className="absolute inset-0 z-0 pointer-events-none"
+      />
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-800 p-12 items-center justify-center relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-primary p-12 items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20" />
         <div className="absolute inset-0 backdrop-blur-3xl opacity-50" />
         <div className="max-w-md relative z-10">
@@ -168,7 +187,7 @@ const AuthPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Only show the Display Name field when creating an account */}
+            {/* Display Name only when signing up */}
             {!isLogin && (
               <div>
                 <label htmlFor="displayName" className="block text-sm font-medium text-gray-300 mb-2">
