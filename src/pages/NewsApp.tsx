@@ -69,14 +69,18 @@ const NewsApp: React.FC = () => {
       if (!fetchResponse.ok) {
         throw new Error("Failed to fetch news");
       }
-      const fetchedData = await fetchResponse.json();
+      // We don't actually need to use the fetched data here,
+      // because the fetch endpoint stores articles in the DB using session_id.
+      await fetchResponse.json();
 
+      // Call the process endpoint with session_id only,
+      // so that it only processes (summarizes) articles fetched in this session.
       const processResponse = await fetch(
         `${config.api.baseUrl}${config.api.endpoints.processNews}?session_id=${sessionId}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: fetchedData }),
+          headers: { "Content-Type": "application/json" }
+          // Removed body: JSON.stringify({ data: fetchedData })
         }
       );
       if (!processResponse.ok) {
