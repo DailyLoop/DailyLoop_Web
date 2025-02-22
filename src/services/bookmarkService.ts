@@ -4,7 +4,7 @@ import config from "../config/config";
 const API_BASE_URL = config.api.baseUrl;
 
 export async function addBookmark(userId: string, newsId: string, token: string) {
-  const response = await fetch(`${API_BASE_URL}/api/bookmarks`, {
+  const response = await fetch(`${API_BASE_URL}/api/bookmarks/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
