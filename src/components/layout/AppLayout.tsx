@@ -1,6 +1,6 @@
 // src/components/layout/AppLayout.tsx
 import React, { ReactNode, useState, useEffect } from "react";
-import Header from "./Header";
+import AppHeader from "./AppHeader";
 import Sidebar from "./Sidebar";
 
 interface AppLayoutProps {
@@ -40,7 +40,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       }`}
     >
       <div className="animate-fadeIn">
-        <Header onLogoClick={onLogoClick} onSearch={onSearch} />
+        <AppHeader onLogoClick={onLogoClick} onSearch={onSearch} mode="app" />
         <div className="flex">
           <div
             className={`transition-all duration-700 ease-out transform ${
