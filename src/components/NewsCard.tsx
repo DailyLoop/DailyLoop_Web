@@ -39,6 +39,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected, index })
     try {
       if (isBookmarked) {
         // Remove bookmark if currently bookmarked.
+        console.log("Removing bookmark:", news);
         await removeBookmark(bookmarkId as string, token);
         setIsBookmarked(false);
         setBookmarkId(null);

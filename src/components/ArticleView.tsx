@@ -37,6 +37,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
     try {
       if (isBookmarked) {
         // If already bookmarked, remove the bookmark.
+        console.log("Removing bookmark:", bookmarkId);
         await removeBookmark(bookmarkId as string, token);
         setIsBookmarked(false);
         setBookmarkId(null);

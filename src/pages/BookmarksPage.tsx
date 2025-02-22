@@ -25,28 +25,37 @@ const BookmarksPage: React.FC = () => {
   const [bookmarks, setBookmarks] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  const fetchBookmarks = async () => {
-    if (!user || !token) {
-      console.log("Not authenticated; skipping bookmarks fetch", { user, token });
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await listBookmarks(user.id, token);
-      console.log("Bookmarks response:", data);
-      // Adjust based on the shape of your response:
-      setBookmarks(data.bookmarks || []);
-    } catch (error) {
-      console.error("Failed to fetch bookmarks:", error);
-    }
-    setLoading(false);
-  };
-
   useEffect(() => {
+    let mounted = true;
+
+    const fetchBookmarks = async () => {
+      console.log('fetchBookmarks called with:', { userId: user?.id, hasToken: !!token });
+      if (!user || !token) {
+        console.log("Not authenticated; skipping bookmarks fetch", { user, token });
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const data = await listBookmarks(user.id, token);
+        if (mounted) {
+          console.log("Bookmarks response:", data);
+          setBookmarks(data.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch bookmarks:", error);
+      }
+      if (mounted) {
+        setLoading(false);
+      }
+    };
+
     fetchBookmarks();
-  }, [user, token]);
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id, token]); // Only depend on user.id instead of entire user object
 
   return (
     <div className="relative min-h-screen bg-primary">
@@ -78,6 +87,10 @@ const BookmarksPage: React.FC = () => {
             </button>
           </div>
 
+          {/* <pre className="text-white mb-4">
+            {JSON.stringify(bookmarks[0], null, 2)}
+          </pre> */}
+          
           {loading ? (
             <LoadingState type="cards" count={3} />
           ) : bookmarks.length === 0 ? (
