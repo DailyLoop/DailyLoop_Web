@@ -14,7 +14,7 @@ interface News {
   date: string;
   url: string;
   // Optionally, if the article is already bookmarked, bookmarkId is provided:
-  bookmarkId?: string;
+  bookmark_id?: string;
 }
 
 interface NewsCardProps {
@@ -27,8 +27,8 @@ interface NewsCardProps {
 const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected, index }) => {
   const { user, token } = useAuth();
   // Initialize state based on whether the article is already bookmarked.
-  const [isBookmarked, setIsBookmarked] = useState(!!news.bookmarkId);
-  const [bookmarkId, setBookmarkId] = useState<string | null>(news.bookmarkId || null);
+  const [isBookmarked, setIsBookmarked] = useState(!!news.bookmark_id);
+  const [bookmarkId, setBookmarkId] = useState<string | null>(news.bookmark_id || null);
   const [loading, setLoading] = useState(false);
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
@@ -39,7 +39,9 @@ const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected, index })
     try {
       if (isBookmarked) {
         // Remove bookmark if currently bookmarked.
-        console.log("Removing bookmark:", news);
+        // console.log("Removing bookmark:", news);
+        // console.log("Bookmark ID:", bookmarkId);
+        // console.log("Bookmark ID:", news.bookmark_id);
         await removeBookmark(bookmarkId as string, token);
         setIsBookmarked(false);
         setBookmarkId(null);

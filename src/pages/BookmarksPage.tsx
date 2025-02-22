@@ -17,7 +17,7 @@ interface Article {
   image: string;
   date: string;
   url: string;
-  bookmarkId?: string;
+  bookmark_id?: string;
 }
 
 const BookmarksPage: React.FC = () => {
@@ -89,8 +89,8 @@ const BookmarksPage: React.FC = () => {
 
           {/* <pre className="text-white mb-4">
             {JSON.stringify(bookmarks[0], null, 2)}
-          </pre> */}
-          
+          </pre>
+           */}
           {loading ? (
             <LoadingState type="cards" count={3} />
           ) : bookmarks.length === 0 ? (

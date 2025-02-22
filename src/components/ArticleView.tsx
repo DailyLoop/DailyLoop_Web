@@ -14,7 +14,7 @@ interface Article {
   date: string;
   url: string;
   author: string; // Added author field
-  bookmarkId?: string; // Optional bookmark id if already bookmarked
+  bookmark_id?: string; // Optional bookmark id if already bookmarked
 }
 
 interface ArticleViewProps {
@@ -25,8 +25,8 @@ interface ArticleViewProps {
 const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
   const { user, token } = useAuth();
   // Initialize bookmark state based on the article prop (if provided)
-  const [isBookmarked, setIsBookmarked] = useState(!!article.bookmarkId);
-  const [bookmarkId, setBookmarkId] = useState<string | null>(article.bookmarkId || null);
+  const [isBookmarked, setIsBookmarked] = useState(!!article.bookmark_id);
+  const [bookmarkId, setBookmarkId] = useState<string | null>(article.bookmark_id || null);
   const [loading, setLoading] = useState(false);
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
@@ -37,7 +37,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
     try {
       if (isBookmarked) {
         // If already bookmarked, remove the bookmark.
-        console.log("Removing bookmark:", bookmarkId);
+        // console.log("Removing bookmark:", bookmarkId);
         await removeBookmark(bookmarkId as string, token);
         setIsBookmarked(false);
         setBookmarkId(null);
