@@ -40,8 +40,8 @@ interface NewsProviderProps {
 }
 
 const processNewsData = (data: any[]): News[] => {
-  return data.map((item: any, index: number) => ({
-    id: String(index + 1),
+  return data.map((item: any) => ({
+    id: item.id || String(Math.random()),
     title: item.title || '',
     summary: item.summary || '',
     context: item.content || '',
