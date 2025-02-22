@@ -10,7 +10,7 @@ export async function addBookmark(userId: string, newsId: string, token: string)
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`,
     },
-    body: JSON.stringify({ news_id: newsId }),
+    body: JSON.stringify({ news_id: newsId, user_id: userId }),
   });
   if (!response.ok) {
     const errorData = await response.json();
