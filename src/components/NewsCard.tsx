@@ -22,9 +22,10 @@ interface NewsCardProps {
   onClick: () => void;
   isSelected?: boolean;
   index: number;
+  onBookmarkRemoved?: (articleId: string) => void;  // Add this prop
 }
 
-const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected, index }) => {
+const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected, index, onBookmarkRemoved }) => {
   const { user, token } = useAuth();
   // Initialize state based on whether the article is already bookmarked.
   const [isBookmarked, setIsBookmarked] = useState(!!news.bookmark_id);
@@ -32,19 +33,16 @@ const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected, index })
   const [loading, setLoading] = useState(false);
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
-    if (!user || !token) return; // Ensure user is authenticated
+    e.stopPropagation();
+    if (!user || !token) return;
 
     setLoading(true);
     try {
       if (isBookmarked) {
-        // Remove bookmark if currently bookmarked.
-        // console.log("Removing bookmark:", news);
-        // console.log("Bookmark ID:", bookmarkId);
-        // console.log("Bookmark ID:", news.bookmark_id);
         await removeBookmark(bookmarkId as string, token);
         setIsBookmarked(false);
         setBookmarkId(null);
+        onBookmarkRemoved?.(news.id);  // Add this line
       } else {
         // Add bookmark if not bookmarked.
         const data = await addBookmark(user.id, news.id, token);

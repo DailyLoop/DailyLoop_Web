@@ -57,6 +57,12 @@ const BookmarksPage: React.FC = () => {
     };
   }, [user?.id, token]); // Only depend on user.id instead of entire user object
 
+  const handleBookmarkRemove = (articleId: string) => {
+    setBookmarks(prevBookmarks => 
+      prevBookmarks.filter(bookmark => bookmark.id !== articleId)
+    );
+  };
+
   return (
     <div className="relative min-h-screen bg-primary">
       <Waves
@@ -103,6 +109,7 @@ const BookmarksPage: React.FC = () => {
                   news={article}
                   onClick={() => navigate(`/article/${article.id}`)}
                   index={index}
+                  onBookmarkRemoved={() => handleBookmarkRemove(article.id)}
                 />
               ))}
             </div>
