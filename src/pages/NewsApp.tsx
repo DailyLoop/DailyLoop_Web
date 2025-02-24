@@ -7,6 +7,7 @@ import LoadingState from '../components/common/LoadingState';
 import config from '../config/config';
 import SessionService from '../services/sessionService';
 import { useAuth } from '../context/AuthContext'; // Import Auth context
+import { StoryTrackingProvider } from '../context/StoryTrackingContext'; // Import StoryTrackingProvider
 
 const NewsApp: React.FC = () => {
   const { user } = useAuth(); // Get the current user
@@ -134,16 +135,18 @@ const NewsApp: React.FC = () => {
 
       {hasSearched ? (
         <>
-          <NewsProvider key={providerKey} newsData={newsData}>
-            <AppLayout
-              onLogoClick={handleReset}
-              onSearch={handleSearch}
-              toggleKeyword={toggleKeyword}
-              selectedKeywords={selectedKeywords}
-            >
-              <ArticleThread />
-            </AppLayout>
-          </NewsProvider>
+          <StoryTrackingProvider>
+            <NewsProvider key={providerKey} newsData={newsData}>
+              <AppLayout
+                onLogoClick={handleReset}
+                onSearch={handleSearch}
+                toggleKeyword={toggleKeyword}
+                selectedKeywords={selectedKeywords}
+              >
+                <ArticleThread />
+              </AppLayout>
+            </NewsProvider>
+          </StoryTrackingProvider>
           {showShimmer && (
             <div className="absolute inset-0 flex items-center justify-center z-50">
               <div className="absolute inset-0 bg-gray-900 bg-opacity-75 animate-pulse"></div>
@@ -153,7 +156,6 @@ const NewsApp: React.FC = () => {
         </>
       ) : (
         <LandingPage onSearch={async (query) => await handleSearch(query)} />
-        
       )}
     </div>
   );

@@ -71,10 +71,10 @@ export const NewsProvider: React.FC<NewsProviderProps> = ({
   const refreshNews = useCallback(async () => {
     setIsTransitioning(true);
     setError(null);
+    setLoading(true);
     try {
       // Process the raw newsData into the shape we need
       const processedNews = processNewsData(newsData);
-      setLoading(true);
       // Wait for a transition-out animation (simulate with 300ms delay)
       await new Promise((resolve) => setTimeout(resolve, 300));
       // Update our news state with the processed data

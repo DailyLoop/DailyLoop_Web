@@ -2,13 +2,14 @@
 import React, { ReactNode, useState, useEffect } from "react";
 import AppHeader from "./AppHeader";
 import Sidebar from "./Sidebar";
+import StoryTrackingTabs from "../story-tracking/StoryTrackingTabs";
 
 interface AppLayoutProps {
   children: ReactNode;
   onLogoClick: () => void;
   onSearch: (query: string) => void;
-  toggleKeyword: (kw: string) => void;      // NEW
-  selectedKeywords: string[];               // NEW
+  toggleKeyword: (kw: string) => void;
+  selectedKeywords: string[];
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({
@@ -41,6 +42,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     >
       <div className="animate-fadeIn">
         <AppHeader onLogoClick={onLogoClick} onSearch={onSearch} mode="app" />
+        <StoryTrackingTabs />
         <div className="flex">
           <div
             className={`transition-all duration-700 ease-out transform ${
@@ -56,7 +58,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           </div>
           <main
             className={`flex-1 transition-all duration-700 ease-out transform ${
-              isContentVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+              isContentVisible
+                ? "translate-x-0 opacity-100"
+                : "translate-x-full opacity-0"
             }`}
           >
             {children}

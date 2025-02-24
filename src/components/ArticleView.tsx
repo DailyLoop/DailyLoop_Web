@@ -1,8 +1,9 @@
 // src/components/ArticleView.tsx
 import React, { useState } from "react";
-import { ArrowLeft, Bookmark, Share2, Clock, ExternalLink } from "lucide-react";
+import { ArrowLeft, Bookmark, Share2, Clock, ExternalLink, Radio } from "lucide-react";
 import { Waves } from "./ui/waves-background";
 import { useAuth } from "../context/AuthContext";
+import { useStoryTracking } from "../context/StoryTrackingContext";
 import { addBookmark, removeBookmark } from "../services/bookmarkService";
 
 interface Article {
@@ -24,10 +25,21 @@ interface ArticleViewProps {
 
 const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
   const { user, token } = useAuth();
+  const { startTracking, stopTracking, trackedStories } = useStoryTracking();
+  const keyword = article.title.split(' ').slice(0, 3).join(' ');
+  const isTracking = trackedStories.some(story => story.keyword === keyword);
   // Initialize bookmark state based on the article prop (if provided)
   const [isBookmarked, setIsBookmarked] = useState(!!article.bookmark_id);
   const [bookmarkId, setBookmarkId] = useState<string | null>(article.bookmark_id || null);
   const [loading, setLoading] = useState(false);
+
+  const handleTrackClick = () => {
+    if (isTracking) {
+      stopTracking(keyword);
+    } else {
+      startTracking(keyword);
+    }
+  };
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent other click events from firing
@@ -114,6 +126,14 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
                 >
                   <Bookmark
                     className={`h-5 w-5 ${isBookmarked ? "text-blue-500" : "text-gray-400"}`}
+                  />
+                </button>
+                <button
+                  onClick={handleTrackClick}
+                  className="transition-colors duration-300"
+                >
+                  <Radio
+                    className={`h-5 w-5 ${isTracking ? "text-blue-500" : "text-gray-400"}`}
                   />
                 </button>
                 <button className="text-gray-400 hover:text-blue-500 transition-colors">
