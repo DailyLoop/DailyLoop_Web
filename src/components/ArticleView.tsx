@@ -5,6 +5,7 @@ import { Waves } from "./ui/waves-background";
 import { useAuth } from "../context/AuthContext";
 import { useStoryTracking } from "../context/StoryTrackingContext";
 import { addBookmark, removeBookmark } from "../services/bookmarkService";
+import { useNavigate } from "react-router-dom";
 
 interface Article {
   id: string;
@@ -26,18 +27,31 @@ interface ArticleViewProps {
 const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
   const { user, token } = useAuth();
   const { startTracking, stopTracking, trackedStories } = useStoryTracking();
+  const navigate = useNavigate();
   const keyword = article.title.split(' ').slice(0, 3).join(' ');
   const isTracking = trackedStories.some(story => story.keyword === keyword);
   // Initialize bookmark state based on the article prop (if provided)
   const [isBookmarked, setIsBookmarked] = useState(!!article.bookmark_id);
   const [bookmarkId, setBookmarkId] = useState<string | null>(article.bookmark_id || null);
   const [loading, setLoading] = useState(false);
+  const [trackingLoading, setTrackingLoading] = useState(false);
 
   const handleTrackClick = () => {
-    if (isTracking) {
-      stopTracking(keyword);
-    } else {
-      startTracking(keyword);
+    setTrackingLoading(true);
+    try {
+      if (isTracking) {
+        stopTracking(keyword);
+        console.log('Stopped tracking:', keyword);
+      } else {
+        startTracking(keyword);
+        console.log('Started tracking:', keyword);
+        // Navigate to the story tracking page
+        navigate(`/story-tracking/${encodeURIComponent(keyword)}`);
+      }
+    } catch (error) {
+      console.error('Error with story tracking:', error);
+    } finally {
+      setTrackingLoading(false);
     }
   };
 
@@ -130,11 +144,13 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
                 </button>
                 <button
                   onClick={handleTrackClick}
+                  disabled={trackingLoading}
                   className="transition-colors duration-300"
                 >
                   <Radio
                     className={`h-5 w-5 ${isTracking ? "text-blue-500" : "text-gray-400"}`}
                   />
+                  {trackingLoading && <span className="ml-1 text-xs text-gray-400">...</span>}
                 </button>
                 <button className="text-gray-400 hover:text-blue-500 transition-colors">
                   <Share2 className="h-5 w-5" />
