@@ -29,7 +29,7 @@ const StoryTrackingTabs: React.FC = () => {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                stopTracking(story.keyword);
+                stopTracking(story.id);
               }}
               className="ml-2 text-red-300 hover:text-red-500"
             >
