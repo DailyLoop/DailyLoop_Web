@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { useStoryTracking } from '../../context/StoryTrackingContext';
 import { usePolling } from '../../context/PollingContext';
 import config from '../../config/config';
+import { supabase } from '../../lib/supabase';
 
 interface StoryTrackingTabContextProps {
   keyword: string;
@@ -26,7 +27,7 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
     console.log('Setting up polling for keyword:', keyword); // Debug: Log polling setup
     
     // We'll use the global polling state instead of local lastPollTime
-    const POLL_INTERVAL = 300000; // 5 minutes in milliseconds
+    const POLL_INTERVAL = 180000; // 3 minutes in milliseconds
     // Cache to track already seen article URLs
     const seenArticleUrls = new Set<string>();
     
@@ -46,13 +47,25 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
         const apiUrl = `${config.api.baseUrl}${config.api.endpoints.storyTracking}?keyword=${encodedKeyword}`;
         console.log('Making API call to:', apiUrl); // Log the full URL being called
         
+        // Get the authentication token from Supabase
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        
         // Add a timeout to the fetch request
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
         
         const response = await fetch(
           apiUrl,
-          { signal: controller.signal }
+          { 
+            signal: controller.signal,
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': token ? `Bearer ${token}` : ''
+            }
+          }
         ).finally(() => clearTimeout(timeoutId));
         
         console.log('API response status:', response.status);
@@ -133,8 +146,8 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
     // Call immediately to avoid initial delay
     pollForArticles();
     
-    // Then set up interval for subsequent polls - increased to 6 minutes
-    const intervalId = setInterval(pollForArticles, 360000); // Increased from 3 minutes (180000) to 6 minutes (360000)
+    // Then set up interval for subsequent polls - changed back to 3 minutes
+    const intervalId = setInterval(pollForArticles, 180000); // Changed from 6 minutes (360000) to 3 minutes (180000)
 
     return () => {
       console.log('Cleaning up polling for keyword:', keyword); // Debug: Log cleanup

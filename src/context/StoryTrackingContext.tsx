@@ -1,71 +1,117 @@
 // src/context/StoryTrackingContext.tsx
 
-import React, { createContext, useState, useContext } from 'react';
-
-/**
- * Article interface
- * Customize fields to match your actual article shape
- */
-interface Article {
-  id: string;
-  title: string;
-  source: string;
-  publishedAt: string;  // or Date
-  url: string;
-  // add other fields like "summary", "image", etc. if needed
-}
-
-/**
- * Each tracked story is tied to a specific keyword
- */
-interface TrackedStory {
-  keyword: string;
-  articles: Article[];
-}
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { storyTrackingService, TrackedStory, Article } from '../services/storyTrackingService';
+import { useAuth } from './AuthContext';
 
 /**
  * Context shape for story tracking
  */
 interface StoryTrackingContextValue {
   trackedStories: TrackedStory[];
-  startTracking: (keyword: string) => void;
-  stopTracking: (keyword: string) => void;
-  addArticlesToStory: (keyword: string, newArticles: Article[]) => void;
+  startTracking: (keyword: string, sourceArticleId?: string) => Promise<void>;
+  stopTracking: (storyId: string) => Promise<void>;
+  addArticlesToStory: (storyId: string, newArticles: Article[]) => void;
+  loading: boolean;
+  error: string | null;
 }
 
 const StoryTrackingContext = createContext<StoryTrackingContextValue | undefined>(undefined);
 
 export const StoryTrackingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [trackedStories, setTrackedStories] = useState<TrackedStory[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  // Fetch tracked stories when the component mounts and when user changes
+  useEffect(() => {
+    if (user) {
+      fetchTrackedStories();
+    } else {
+      // Clear stories when user logs out
+      setTrackedStories([]);
+    }
+  }, [user]);
 
   /**
-   * Start tracking a new keyword/topic if not already tracked
+   * Fetch all tracked stories from the backend
    */
-  const startTracking = (keyword: string) => {
-    setTrackedStories(prev => {
-      // if the keyword is already tracked, do nothing
-      if (prev.some(story => story.keyword === keyword)) {
-        return prev;
-      }
-      // otherwise add a new empty story
-      return [...prev, { keyword, articles: [] }];
-    });
+  const fetchTrackedStories = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const stories = await storyTrackingService.getTrackedStories();
+      setTrackedStories(stories);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch tracked stories');
+      console.error('Error fetching tracked stories:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   /**
-   * Stop tracking a keyword/topic
+   * Start tracking a new keyword/topic
    */
-  const stopTracking = (keyword: string) => {
-    setTrackedStories(prev => prev.filter(story => story.keyword !== keyword));
+  const startTracking = async (keyword: string, sourceArticleId?: string) => {
+    if (!user) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Check if already tracking this keyword
+      if (trackedStories.some(story => story.keyword === keyword)) {
+        return; // Already tracking this keyword
+      }
+      
+      // Create a new tracked story in the backend
+      const newStory = await storyTrackingService.createTrackedStory(keyword, sourceArticleId);
+      
+      // Update local state
+      setTrackedStories(prev => [...prev, newStory]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start tracking');
+      console.error('Error starting tracking:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Stop tracking a story by ID
+   */
+  const stopTracking = async (storyId: string) => {
+    if (!user) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Delete the tracked story from the backend
+      await storyTrackingService.deleteTrackedStory(storyId);
+      
+      // Update local state
+      setTrackedStories(prev => prev.filter(story => story.id !== storyId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to stop tracking');
+      console.error('Error stopping tracking:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   /**
    * Merge newly fetched articles into an existing story, removing duplicates
    */
-  const addArticlesToStory = (keyword: string, newArticles: Article[]) => {
+  const addArticlesToStory = (storyId: string, newArticles: Article[]) => {
     setTrackedStories(prev =>
       prev.map(story => {
-        if (story.keyword === keyword) {
+        if (story.id === storyId) {
           const combined = [...story.articles, ...newArticles];
           // remove duplicates by ID
           const uniqueById = Array.from(new Set(combined.map(a => a.id)))
@@ -82,7 +128,9 @@ export const StoryTrackingProvider: React.FC<{ children: React.ReactNode }> = ({
       trackedStories,
       startTracking,
       stopTracking,
-      addArticlesToStory
+      addArticlesToStory,
+      loading,
+      error
     }}>
       {children}
     </StoryTrackingContext.Provider>
@@ -98,4 +146,4 @@ export const useStoryTracking = () => {
     throw new Error('useStoryTracking must be used within a StoryTrackingProvider');
   }
   return context;
-};
+}
