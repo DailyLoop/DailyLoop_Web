@@ -17,7 +17,7 @@ const StoryTrackingTabs: React.FC = () => {
       <div className="flex space-x-2">
         {trackedStories.map(story => (
           <div
-            key={story.keyword}
+            key={story.id}
             onClick={() => {
               // Navigate to the story tracking page for the selected keyword
               navigate(`/story-tracking/${encodeURIComponent(story.keyword)}`);
