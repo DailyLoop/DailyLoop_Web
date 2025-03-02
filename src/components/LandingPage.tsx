@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Waves } from "./ui/waves-background";
 import AppHeader from "./layout/AppHeader";
+import StoryTrackingTabs from "./story-tracking/StoryTrackingTabs";
 import { useAuth } from "../context/AuthContext";
 
 const loadingMessages = [
@@ -105,6 +106,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSearch }) => {
         className="z-0"
       />
 
+      <div className="relative z-10">
+        <StoryTrackingTabs />
+      </div>
+
+  
       {/* Rest of your landing page content */}
       <div className="flex items-center justify-center px-4 min-h-[calc(100vh-73px)] relative z-10">
         <div
