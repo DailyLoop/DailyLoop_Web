@@ -43,7 +43,8 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
         stopTracking(keyword);
         console.log('Stopped tracking:', keyword);
       } else {
-        // Navigate to the story tracking page
+        // Simply navigate to the tracking page without starting tracking here
+        // The StoryTrackingPage will handle tracking initiation
         navigate(`/story-tracking/${encodeURIComponent(keyword)}`);
       }
     } catch (error) {

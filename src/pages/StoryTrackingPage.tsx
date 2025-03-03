@@ -40,9 +40,10 @@ const StoryTrackingPage: React.FC = () => {
     if (keyword) {
       console.log('Starting to track keyword:', keyword);
       
+      // Start tracking and update state
       startTracking(keyword);
+      setIsTracking(true);
       
-
       // Set a timeout to show a message if articles don't load within 15 seconds
       const timeoutId = setTimeout(() => {
         setLoadingTimeout(true);
@@ -50,10 +51,13 @@ const StoryTrackingPage: React.FC = () => {
       
       return () => {
         clearTimeout(timeoutId);
+        // We intentionally don't stop tracking on unmount to maintain article history
+        // If needed, uncomment below:
         // stopTracking(keyword);
+        // setIsTracking(false);
       };
     }
-  }, [keyword, startTracking]);
+  }, [keyword]); // Remove startTracking from dependencies
   
   // Update loading state when articles are available
   useEffect(() => {

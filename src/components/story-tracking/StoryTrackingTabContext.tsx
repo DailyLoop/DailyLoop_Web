@@ -27,7 +27,7 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
     console.log('Setting up polling for keyword:', keyword); // Debug: Log polling setup
     
     // We'll use the global polling state instead of local lastPollTime
-    const POLL_INTERVAL = 180000; // 3 minutes in milliseconds
+    const POLL_INTERVAL = 30000 //180000; // 3 minutes in milliseconds
     // Cache to track already seen article URLs
     const seenArticleUrls = new Set<string>();
     
@@ -40,10 +40,40 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
       
       // Register this poll in the global state
       registerPoll(keyword);
+
+      //////////////////////////////////////////
+      // FOR TESTING ONLY: Inject a fake article
+      // const testArticle = {
+      //   id: `test-${Date.now()}`,
+      //   title: `New Article about ${keyword} - ${new Date().toLocaleTimeString()}`,
+      //   summary: `This is a test article about ${keyword} generated at ${new Date().toLocaleTimeString()}`,
+      //   content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. This article was generated for testing the polling mechanism.`,
+      //   source: 'Test News',
+      //   author: 'Test Author',
+      //   publishedAt: new Date().toISOString(),
+      //   url: `https://example.com/test/${Date.now()}`,
+      //   image: 'https://placehold.co/600x400?text=Test+Article',
+      // };
       
+      // // If we have a story, add our test article to it
+      // if (story) {
+      //   console.log('Adding test article to story:', testArticle.title);
+      //   addArticlesToStory(story.id, [testArticle]);
+      // }
+      
+      // select random words from an array to simulate a keyword
+      const randomWords = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape'];
+      const randomKeyword = randomWords[Math.floor(Math.random() * randomWords.length)];
+      // add random keyword to the keyword
+      console.log('Random keyword:', randomKeyword);
+      // const encodedKeyword = encodeURIComponent(`${keyword} ${randomKeyword}`).replace(/%20/g, '+');
+      const encodedKeyword = encodeURIComponent(`${randomKeyword}`).replace(/%20/g, '+');
+
+      //////////////////////////////////////////
+
       try {
         console.log('Polling for new articles...'); // Debug: Log polling attempt
-        const encodedKeyword = encodeURIComponent(keyword).replace(/%20/g, '+');
+        // const encodedKeyword = encodeURIComponent(keyword).replace(/%20/g, '+');
         const apiUrl = `${config.api.baseUrl}${config.api.endpoints.storyTracking}?keyword=${encodedKeyword}`;
         console.log('Making API call to:', apiUrl); // Log the full URL being called
         
@@ -128,8 +158,10 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
             };
           }).filter(Boolean); // Remove any null values
           
-          if (formattedArticles.length > 0) {
-            addArticlesToStory(keyword, formattedArticles);
+          if (formattedArticles.length > 0 && story) {
+            addArticlesToStory(story.id, formattedArticles);
+          } else if (formattedArticles.length > 0) {
+            console.warn('Found articles but no story to add them to');
           } else {
             console.log('No valid articles found in the filtered response');
           }
@@ -147,7 +179,7 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
     pollForArticles();
     
     // Then set up interval for subsequent polls - changed back to 3 minutes
-    const intervalId = setInterval(pollForArticles, 180000); // Changed from 6 minutes (360000) to 3 minutes (180000)
+    const intervalId = setInterval(pollForArticles, POLL_INTERVAL); // Changed from 6 minutes (360000) to 3 minutes (180000)
 
     return () => {
       console.log('Cleaning up polling for keyword:', keyword); // Debug: Log cleanup
