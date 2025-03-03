@@ -26,7 +26,7 @@ interface ArticleViewProps {
 
 const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
   const { user, token } = useAuth();
-  const { startTracking, stopTracking, trackedStories } = useStoryTracking();
+  const { stopTracking, trackedStories } = useStoryTracking();
   const navigate = useNavigate();
   const keyword = article.title.split(' ').slice(0, 3).join(' ');
   const isTracking = trackedStories.some(story => story.keyword === keyword);
@@ -43,8 +43,6 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
         stopTracking(keyword);
         console.log('Stopped tracking:', keyword);
       } else {
-        startTracking(keyword);
-        console.log('Started tracking:', keyword);
         // Navigate to the story tracking page
         navigate(`/story-tracking/${encodeURIComponent(keyword)}`);
       }

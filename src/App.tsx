@@ -1,6 +1,4 @@
-// src/App.tsx
-
-import React from "react";
+import React, { useCallback } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import NewsApp from "./pages/NewsApp";
@@ -14,9 +12,16 @@ import { StoryTrackingProvider } from "./context/StoryTrackingContext";
 import { PollingProvider } from "./context/PollingContext";
 
 function App() {
-  const { user, loading } = useAuth();
+  const { user, loading, initialized } = useAuth();
+  const isAuthenticated = !!user;
+  
+  const handleSearch = useCallback(async () => {
+    // Your search implementation
+  }, []);
 
-  if (loading) {
+  // Show loading state until auth is fully initialized
+  if (!initialized || loading) {
+    console.log("[App] Waiting for auth initialization:", { isAuthenticated, initialized, loading });
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <LoadingState type="spinner" />
@@ -24,6 +29,10 @@ function App() {
     );
   }
 
+  // Log final state after initialization
+  console.log("[App] Auth state resolved:", { isAuthenticated, initialized });
+
+  // Render routes based on auth state
   return (
     <PollingProvider>
       <StoryTrackingProvider>
@@ -31,39 +40,39 @@ function App() {
           <Route
             path="/"
             element={
-              user ? <Navigate to="/app" replace /> : <LandingPage onSearch={async () => {}} />
+              isAuthenticated ? 
+                <Navigate to="/app" replace /> : 
+                <LandingPage onSearch={handleSearch} />
             }
           />
-        <Route
-          path="/auth"
-          element={user ? <Navigate to="/app" replace /> : <AuthPage />}
-        />
-        <Route
-          path="/app"
-          element={user ? <NewsApp /> : <Navigate to="/auth" replace />}
-        />
-        <Route
-          path="/profile"
-          element={user ? <ProfilePage /> : <Navigate to="/auth" replace />}
-        />
-        <Route
-          path="/bookmarks"
-          element={user ? <BookmarksPage /> : <Navigate to="/auth" replace />}
-        />
-        {/* New route for story tracking */}
-        <Route
-          path="/story-tracking/:keyword"
-          element={
-            user ? (
-              <StoryTrackingPage />
-            ) : (
-              <Navigate to="/auth" replace />
-            )
-          }
-        />
-        {/* Fallback route */}
-        <Route path="*" element={<div className="text-white p-4">Page not found</div>} />
-      </Routes>
+          <Route
+            path="/auth"
+            element={isAuthenticated ? <Navigate to="/app" replace /> : <AuthPage />}
+          />
+          <Route
+            path="/app"
+            element={isAuthenticated ? <NewsApp /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="/profile"
+            element={isAuthenticated ? <ProfilePage /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="/bookmarks"
+            element={isAuthenticated ? <BookmarksPage /> : <Navigate to="/auth" replace />}
+          />
+          <Route
+            path="/story-tracking/:keyword"
+            element={
+              isAuthenticated ? (
+                <StoryTrackingPage />
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            }
+          />
+          <Route path="*" element={<div className="text-white p-4">Page not found</div>} />
+        </Routes>
       </StoryTrackingProvider>
     </PollingProvider>
   );

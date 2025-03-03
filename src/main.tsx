@@ -7,12 +7,12 @@ import { AuthProvider } from './context/AuthContext';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <App />
         <Toaster position="top-center" />
       </AuthProvider>
     </BrowserRouter>
-  </StrictMode>
+  // </StrictMode>
 );

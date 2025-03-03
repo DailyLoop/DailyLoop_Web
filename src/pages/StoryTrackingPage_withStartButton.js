@@ -5,7 +5,7 @@ import StoryTrackingTabContext from '../components/story-tracking/StoryTrackingT
 import AppHeader from '../components/layout/AppHeader';
 import { useStoryTracking } from '../context/StoryTrackingContext';
 import LoadingState from '../components/common/LoadingState';
-import { Play, Pause } from 'lucide-react'; // Import Play and Pause icons
+import { Play, Pause, Info } from 'lucide-react'; // Added Info icon
 
 const StoryTrackingPage: React.FC = () => {
   const { keyword } = useParams<{ keyword: string }>();
@@ -39,10 +39,8 @@ const StoryTrackingPage: React.FC = () => {
   useEffect(() => {
     if (keyword) {
       console.log('Starting to track keyword:', keyword);
+      // No automatic tracking - user must click play button
       
-      startTracking(keyword);
-      
-
       // Set a timeout to show a message if articles don't load within 15 seconds
       const timeoutId = setTimeout(() => {
         setLoadingTimeout(true);
@@ -50,10 +48,12 @@ const StoryTrackingPage: React.FC = () => {
       
       return () => {
         clearTimeout(timeoutId);
-        // stopTracking(keyword);
+        if (isTracking && keyword) {
+          stopTracking(keyword);
+        }
       };
     }
-  }, [keyword, startTracking]);
+  }, [keyword, isTracking, stopTracking]);
   
   // Update loading state when articles are available
   useEffect(() => {
@@ -84,12 +84,25 @@ const StoryTrackingPage: React.FC = () => {
           <button
             onClick={handleTrackClick}
             disabled={trackingLoading}
-            className="transition-colors duration-300"
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors duration-300"
           >
-            {isTracking ? <Pause className="h-6 w-6 text-blue-500" /> : <Play className="h-6 w-6 text-gray-400" />}
-            {trackingLoading && <span className="ml-1 text-xs text-gray-400">...</span>}
+            {isTracking ? 
+              <><Pause className="h-5 w-5 text-blue-500" /><span className="ml-2 text-blue-400">Pause Tracking</span></> : 
+              <><Play className="h-5 w-5 text-gray-400" /><span className="ml-2 text-gray-300">Start Tracking</span></>
+            }
+            {trackingLoading && <span className="ml-2 text-xs text-gray-400">...</span>}
           </button>
         </div>
+
+        {!isTracking && (
+          <div className="mb-6 p-4 bg-blue-900/30 border border-blue-700/50 rounded-lg flex items-start">
+            <Info className="h-5 w-5 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-blue-300">Click the "Start Tracking" button to begin actively monitoring this topic.</p>
+              <p className="text-gray-400 text-sm mt-1">Tracking will search for new articles and updates about this topic in real-time.</p>
+            </div>
+          </div>
+        )}
 
         {!keyword ? (
           <div className="text-white p-4 bg-gray-800 rounded-lg">No keyword selected.</div>
@@ -97,11 +110,17 @@ const StoryTrackingPage: React.FC = () => {
           <StoryTrackingTabContext keyword={keyword} />
         ) : (
           <div className="p-8 text-center">
-            <LoadingState type="spinner" />
-            <p className="text-gray-400 mt-4">Fetching articles about "{keyword}"...</p>
-            <p className="text-gray-500 text-sm mt-2">This may take a moment as we gather the latest news</p>
+            {isTracking ? (
+              <>
+                <LoadingState type="spinner" />
+                <p className="text-gray-400 mt-4">Fetching articles about "{keyword}"...</p>
+                <p className="text-gray-500 text-sm mt-2">This may take a moment as we gather the latest news</p>
+              </>
+            ) : (
+              <p className="text-gray-400">Press the "Start Tracking" button above to begin finding articles</p>
+            )}
             
-            {loadingTimeout && (
+            {loadingTimeout && isTracking && (
               <div className="mt-6 p-4 bg-gray-800 rounded-lg">
                 <p className="text-yellow-400">It's taking longer than expected to load articles.</p>
                 <p className="text-gray-400 mt-2">This could be due to:</p>
