@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext'; // Import Auth context
 // StoryTrackingProvider is now provided at the App level
 
 const NewsApp: React.FC = () => {
-  const { user } = useAuth(); // Get the current user
+  const { user, token } = useAuth(); // Get the current user
 
   const [hasSearched, setHasSearched] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -61,29 +61,46 @@ const NewsApp: React.FC = () => {
 
     try {
       const sessionId = SessionService.getSessionId();
-      const userId = user?.id; // Get the current user's ID
-
-      // Build the fetch URL including keyword, session_id, and user_id (if available)
-      const fetchUrl = `${config.api.baseUrl}${config.api.endpoints.fetchNews}?keyword=${encodeURIComponent(finalQuery)}&session_id=${sessionId}${userId ? `&user_id=${userId}` : ''}`;
+      
+      // Build the fetch URL including keyword and session_id
+      const fetchUrl = `${config.api.baseUrl}${config.api.endpoints.fetchNews}?keyword=${encodeURIComponent(finalQuery)}&session_id=${sessionId}`;
 
       const fetchResponse = await fetch(fetchUrl);
       if (!fetchResponse.ok) {
         throw new Error("Failed to fetch news");
       }
-      // We don't actually need to use the fetched data here,
-      // because the fetch endpoint stores articles in the DB using session_id.
-      await fetchResponse.json();
+      
+      // Get the article IDs from the fetch response
+      const { data: articleIds } = await fetchResponse.json();
 
-      // Call the process endpoint with session_id only,
-      // so that it only processes (summarizes) articles fetched in this session.
-      const processResponse = await fetch(
-        `${config.api.baseUrl}${config.api.endpoints.processNews}?session_id=${sessionId}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" }
-          // Removed body: JSON.stringify({ data: fetchedData })
-        }
-      );
+      // Call the process endpoint with session_id in query params and article_ids in request body
+      const processUrl = `${config.api.baseUrl}${config.api.endpoints.processNews}?session_id=${sessionId}`;
+      
+      // // Prepare request headers, including Authorization if user is logged in
+      // const headers: Record<string, string> = {
+      //   "Content-Type": "application/json"
+      // };
+      
+      // // Add JWT token if user is logged in
+      // if (user && localStorage.getItem('authToken')) {
+      //   headers['Authorization'] = `Bearer ${localStorage.getItem('authToken')}`;
+      // }
+      
+      // console.log("Request headers:", headers);
+      // console.log(localStorage.getItem('authToken'));
+      // console.log("User:", user);
+
+
+
+      const processResponse = await fetch(processUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ article_ids: articleIds })
+      });
+      
       if (!processResponse.ok) {
         throw new Error("Failed to process news");
       }

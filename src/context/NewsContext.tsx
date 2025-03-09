@@ -19,6 +19,7 @@ export interface News {
   url: string;
   author: string;
   filter_keywords?: string[];
+  bookmarked_id?: string; // Add this line
 }
 
 interface NewsContextType {
@@ -52,7 +53,8 @@ const processNewsData = (data: any[]): News[] => {
       ? new Date(item.publishedAt).toISOString().split("T")[0]
       : "",
     author: item.author || "Unknown",
-    filter_keywords: item.filter_keywords || []
+    filter_keywords: item.filter_keywords || [],
+    bookmarked_id: item.bookmarked_id || null, // Add this line
   }));
 };
 

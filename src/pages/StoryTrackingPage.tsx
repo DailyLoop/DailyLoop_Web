@@ -22,7 +22,7 @@ const StoryTrackingPage: React.FC = () => {
     setTrackingLoading(true);
     try {
       if (isTracking) {
-        await stopTracking(keyword);
+        await stopTracking(keyword);  // ❌ Same issue - passing keyword instead of ID
         setIsTracking(false);
       } else {
         await startTracking(keyword);

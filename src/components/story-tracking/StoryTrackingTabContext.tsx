@@ -104,7 +104,7 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
           console.error(`HTTP error! status: ${response.status}`);
           // Add a placeholder article to show something instead of endless loading
           if (story && story.articles.length === 0) {
-            addArticlesToStory(keyword, [{
+            addArticlesToStory(story.id, [{
               id: `error-${Date.now()}`,
               title: `Unable to fetch articles (Status: ${response.status})`,
               source: 'System Message',
@@ -185,7 +185,7 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
       console.log('Cleaning up polling for keyword:', keyword); // Debug: Log cleanup
       clearInterval(intervalId);
     };
-  }, [keyword, addArticlesToStory]);
+  }, [keyword, addArticlesToStory, canPoll, registerPoll, story]);
 
   if (!story) {
     console.log('No story found for keyword:', keyword); // Debug: Log when no story is found

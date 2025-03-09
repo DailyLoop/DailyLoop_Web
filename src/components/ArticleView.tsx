@@ -16,7 +16,7 @@ interface Article {
   date: string;
   url: string;
   author: string; // Added author field
-  bookmark_id?: string; // Optional bookmark id if already bookmarked
+  bookmarked_id?: string; // Optional bookmark id if already bookmarked
 }
 
 interface ArticleViewProps {
@@ -31,8 +31,8 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
   const keyword = article.title.split(' ').slice(0, 3).join(' ');
   const isTracking = trackedStories.some(story => story.keyword === keyword);
   // Initialize bookmark state based on the article prop (if provided)
-  const [isBookmarked, setIsBookmarked] = useState(!!article.bookmark_id);
-  const [bookmarkId, setBookmarkId] = useState<string | null>(article.bookmark_id || null);
+  const [isBookmarked, setIsBookmarked] = useState(!!article.bookmarked_id);
+  const [bookmarkId, setBookmarkId] = useState<string | null>(article.bookmarked_id || null);
   const [loading, setLoading] = useState(false);
   const [trackingLoading, setTrackingLoading] = useState(false);
 
@@ -40,7 +40,7 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
     setTrackingLoading(true);
     try {
       if (isTracking) {
-        stopTracking(keyword);
+        stopTracking(article.id);  // ❌ stopTracking expects a story ID, not a keyword stringd);  // Use article.id instead of keyword
         console.log('Stopped tracking:', keyword);
       } else {
         // Simply navigate to the tracking page without starting tracking here
