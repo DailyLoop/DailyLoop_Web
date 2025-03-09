@@ -155,7 +155,7 @@ const ProfilePage: React.FC = () => {
       />
       <div className="relative z-10">
         <AppHeader onLogoClick={handleLogoClick} mode="app" onSearch={() => {}} />
-        <div className="max-w-md mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto px-4 py-8 h-[calc(100vh-80px)] overflow-y-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-white">My Profile</h1>
             <button

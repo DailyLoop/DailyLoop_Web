@@ -1,9 +1,11 @@
 // src/components/ArticleView.tsx
 import React, { useState } from "react";
-import { ArrowLeft, Bookmark, Share2, Clock, ExternalLink } from "lucide-react";
+import { ArrowLeft, Bookmark, Share2, Clock, ExternalLink, Radio, Loader2 } from "lucide-react";
 import { Waves } from "./ui/waves-background";
 import { useAuth } from "../context/AuthContext";
-import { addBookmark, removeBookmark } from "../services/bookmarkService";
+import { useStoryTracking } from "../context/StoryTrackingContext";
+import { useNewsContext } from "../context/NewsContext";
+import { useNavigate } from "react-router-dom";
 
 interface Article {
   id: string;
@@ -23,35 +25,38 @@ interface ArticleViewProps {
 }
 
 const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
-  const { user, token } = useAuth();
-  // Initialize bookmark state based on the article prop (if provided)
-  const [isBookmarked, setIsBookmarked] = useState(!!article.bookmark_id);
-  const [bookmarkId, setBookmarkId] = useState<string | null>(article.bookmark_id || null);
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const { stopTracking, trackedStories } = useStoryTracking();
+  const { isBookmarked, toggleBookmark, bookmarkLoading } = useNewsContext();
+  const navigate = useNavigate();
+  
+  const keyword = article.title.split(' ').slice(0, 3).join(' ');
+  const isTracking = trackedStories.some(story => story.keyword === keyword);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+
+  const handleTrackClick = () => {
+    setTrackingLoading(true);
+    try {
+      if (isTracking) {
+        stopTracking(article.id);  // ❌ stopTracking expects a story ID, not a keyword stringd);  // Use article.id instead of keyword
+        console.log('Stopped tracking:', keyword);
+      } else {
+        // Simply navigate to the tracking page without starting tracking here
+        // The StoryTrackingPage will handle tracking initiation
+        navigate(`/story-tracking/${encodeURIComponent(keyword)}`);
+      }
+    } catch (error) {
+      console.error('Error with story tracking:', error);
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent other click events from firing
-    if (!user || !token) return; // Ensure the user is authenticated
-
-    setLoading(true);
-    try {
-      if (isBookmarked) {
-        // If already bookmarked, remove the bookmark.
-        // console.log("Removing bookmark:", bookmarkId);
-        await removeBookmark(bookmarkId as string, token);
-        setIsBookmarked(false);
-        setBookmarkId(null);
-      } else {
-        // If not bookmarked, add the bookmark.
-        const data = await addBookmark(user.id, article.id, token);
-        // Assuming the API returns the created bookmark's id in data.data.id
-        setIsBookmarked(true);
-        setBookmarkId(data.data.id);
-      }
-    } catch (error) {
-      console.error("Bookmark error:", error);
-    }
-    setLoading(false);
+    if (!user) return; // Ensure the user is authenticated
+    
+    await toggleBookmark(article.id);
   };
 
   return (
@@ -78,7 +83,6 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
           <ArrowLeft className="h-5 w-5" />
           <span className="font-inter">Back to Headlines</span>
         </button>
-
         <article className="bg-primary rounded-xl overflow-hidden mb-6">
           <div className="aspect-video relative">
             <img
@@ -88,7 +92,6 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 to-transparent" />
           </div>
-
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-4">
@@ -109,23 +112,38 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
                 {/* Bookmark Button with toggle functionality */}
                 <button
                   onClick={handleBookmarkClick}
-                  disabled={loading}
+                  disabled={bookmarkLoading}
                   className="transition-colors duration-300"
                 >
-                  <Bookmark
-                    className={`h-5 w-5 ${isBookmarked ? "text-blue-500" : "text-gray-400"}`}
-                  />
+                  {bookmarkLoading ? (
+                    <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                  ) : (
+                    <Bookmark
+                      className={`h-5 w-5 ${isBookmarked(article.id) ? "text-blue-500" : "text-gray-400"}`}
+                    />
+                  )}
+                </button>
+                <button
+                  onClick={handleTrackClick}
+                  disabled={trackingLoading}
+                  className="transition-colors duration-300"
+                >
+                  {trackingLoading ? (
+                    <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                  ) : (
+                    <Radio
+                      className={`h-5 w-5 ${isTracking ? "text-blue-500" : "text-gray-400"}`}
+                    />
+                  )}
                 </button>
                 <button className="text-gray-400 hover:text-blue-500 transition-colors">
                   <Share2 className="h-5 w-5" />
                 </button>
               </div>
             </div>
-
             <h1 className="text-3xl mb-6 font-['Mencken_Std_Narrow'] font-extrabold leading-tight">
               {article.title}
             </h1>
-
             <div className="prose prose-invert max-w-none">
               <div className="mt-4 p-4 bg-secondary/50 rounded-lg">
                 <p className="text-gray-300 text-lg leading-relaxed font-['Shonar_Bangla']">
@@ -133,7 +151,6 @@ const ArticleView: React.FC<ArticleViewProps> = ({ article, onBack }) => {
                 </p>
               </div>
             </div>
-
             <div className="mt-8 pt-6 border-t border-gray-700">
               <a
                 href={article.url || "#"}

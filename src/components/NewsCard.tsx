@@ -1,8 +1,8 @@
 // src/components/NewsCard.tsx
-import React, { useState } from "react";
-import { Clock, Bookmark } from "lucide-react";
+import React from "react";
+import { Clock, Bookmark, Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { addBookmark, removeBookmark } from "../services/bookmarkService";
+import { useNewsContext } from "../context/NewsContext";
 
 interface News {
   id: string;
@@ -26,34 +26,20 @@ interface NewsCardProps {
 }
 
 const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected, index, onBookmarkRemoved }) => {
-  const { user, token } = useAuth();
-  // Initialize state based on whether the article is already bookmarked.
-  const [isBookmarked, setIsBookmarked] = useState(!!news.bookmark_id);
-  const [bookmarkId, setBookmarkId] = useState<string | null>(news.bookmark_id || null);
-  const [loading, setLoading] = useState(false);
-
+  const { user } = useAuth();
+  // Use context-based bookmark management
+  const { isBookmarked, toggleBookmark, bookmarkLoading } = useNewsContext();
+  
   const handleBookmarkClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user || !token) return;
-
-    setLoading(true);
-    try {
-      if (isBookmarked) {
-        await removeBookmark(bookmarkId as string, token);
-        setIsBookmarked(false);
-        setBookmarkId(null);
-        onBookmarkRemoved?.(news.id);  // Add this line
-      } else {
-        // Add bookmark if not bookmarked.
-        const data = await addBookmark(user.id, news.id, token);
-        // Assume API returns an object containing the created bookmark's id.
-        setIsBookmarked(true);
-        setBookmarkId(data.data.id);
-      }
-    } catch (error) {
-      console.error("Bookmark error:", error);
+    if (!user) return;
+    
+    await toggleBookmark(news.id);
+    
+    // If this is a bookmarks page and the bookmark was removed, notify the parent
+    if (onBookmarkRemoved && isBookmarked(news.id)) {
+      onBookmarkRemoved(news.id);
     }
-    setLoading(false);
   };
 
   return (
@@ -112,12 +98,16 @@ const NewsCard: React.FC<NewsCardProps> = ({ news, onClick, isSelected, index, o
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleBookmarkClick}
-                disabled={loading}
+                disabled={bookmarkLoading}
                 className="p-1 transition-colors duration-300"
               >
-                <Bookmark
-                  className={`h-5 w-5 ${isBookmarked ? "text-blue-500" : "text-gray-400"}`}
-                />
+                {bookmarkLoading ? (
+                  <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                ) : (
+                  <Bookmark
+                    className={`h-5 w-5 ${isBookmarked(news.id) ? "text-blue-500" : "text-gray-400"}`}
+                  />
+                )}
               </button>
             </div>
           </div>

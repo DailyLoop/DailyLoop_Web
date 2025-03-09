@@ -31,3 +31,12 @@
 - Set up development environment
 - Configured build tools and dependencies
 - Established project structure
+
+
+# Add the mechanism to add this poll thing to database instead of UI, like the backend itself should keep polling regardless of the UI tracker being open. right now i think the polling stops if i go away from the tracker pages
+
+
+# directly entering http://localhost:5173/story-tracking/air%20sector%20demand created a new tracker with this keyword, stop that
+
+
+# stories tracked after polling is not getting added in the supabase table
