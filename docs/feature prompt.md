@@ -62,10 +62,10 @@ To effectively implement features using AI tools like Windsurf or Cursor, gather
   - TrackedStoryArticle: { storyId, articleId, addedAt }
 
 - **API endpoints**:
-  - POST /api/story-tracking (Create)
-  - GET /api/story-tracking (List all for user)
-  - GET /api/story-tracking/{id} (Get details)
-  - DELETE /api/story-tracking/{id} (Remove)
+  - POST /api/story_tracking (Create)
+  - GET /api/story_tracking (List all for user)
+  - GET /api/story_tracking/{id} (Get details)
+  - DELETE /api/story_tracking/{id} (Remove)
 
 - **Frontend components**:
   - StoryTrackingContext (State management)

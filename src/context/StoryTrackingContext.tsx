@@ -11,6 +11,7 @@ interface StoryTrackingContextValue {
   trackedStories: TrackedStory[];
   startTracking: (keyword: string, sourceArticleId?: string) => Promise<void>;
   stopTracking: (storyId: string) => Promise<void>;
+  togglePolling: (storyId: string, enable: boolean) => Promise<void>;
   addArticlesToStory: (storyId: string, newArticles: Article[]) => void;
   loading: boolean;
   error: string | null;
@@ -65,8 +66,10 @@ export const StoryTrackingProvider: React.FC<{ children: React.ReactNode }> = ({
     
     try {
       // Check if already tracking this keyword
-      if (trackedStories.some(story => story.keyword === keyword)) {
-        return; // Already tracking this keyword
+      const existingStory = trackedStories.find(story => story.keyword === keyword);
+      if (existingStory) {
+        console.log('Already tracking this keyword:', keyword);
+        return;
       }
       
       // Create a new tracked story in the backend
@@ -104,6 +107,42 @@ export const StoryTrackingProvider: React.FC<{ children: React.ReactNode }> = ({
       setLoading(false);
     }
   };
+  
+  /**
+   * Toggle polling status for a story
+   */
+  const togglePolling = async (storyId: string, enable: boolean) => {
+    if (!user) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      if (enable) {
+        await storyTrackingService.startPolling(storyId);
+      } else {
+        await storyTrackingService.stopPolling(storyId);
+      }
+      
+      // Update the story in local state
+      setTrackedStories(prev => 
+        prev.map(story => 
+          story.id === storyId 
+            ? { 
+                ...story, 
+                is_polling: enable,
+                last_polled_at: enable ? new Date().toISOString() : story.last_polled_at
+              } 
+            : story
+        )
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to ${enable ? 'start' : 'stop'} polling`);
+      console.error(`Error ${enable ? 'starting' : 'stopping'} polling:`, err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /**
    * Merge newly fetched articles into an existing story, removing duplicates
@@ -128,6 +167,7 @@ export const StoryTrackingProvider: React.FC<{ children: React.ReactNode }> = ({
       trackedStories,
       startTracking,
       stopTracking,
+      togglePolling,
       addArticlesToStory,
       loading,
       error
@@ -146,4 +186,4 @@ export const useStoryTracking = () => {
     throw new Error('useStoryTracking must be used within a StoryTrackingProvider');
   }
   return context;
-}
+};

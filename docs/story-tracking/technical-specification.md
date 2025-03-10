@@ -50,26 +50,26 @@ interface Article {
 
 ### Create Tracked Story
 ```
-POST /api/story-tracking
+POST /api/story_tracking
 Request: { keyword: string, sourceArticleId?: string }
 Response: { status: string, data: TrackedStory }
 ```
 
 ### Get Tracked Stories
 ```
-GET /api/story-tracking
+GET /api/story_tracking
 Response: { status: string, data: TrackedStory[] }
 ```
 
 ### Get Tracked Story Details
 ```
-GET /api/story-tracking/{id}
+GET /api/story_tracking/{id}
 Response: { status: string, data: TrackedStory }
 ```
 
 ### Delete Tracked Story
 ```
-DELETE /api/story-tracking/{id}
+DELETE /api/story_tracking/{id}
 Response: { status: string, message: string }
 ```
 

@@ -21,6 +21,8 @@ export interface TrackedStory {
   keyword: string;
   created_at: string;
   last_updated: string;
+  is_polling: boolean;
+  last_polled_at: string | null;
   articles: Article[];
 }
 
@@ -31,7 +33,6 @@ export const storyTrackingService = {
   /**
    * Create a new tracked story
    */
-
   createTrackedStory: async (keyword: string, sourceArticleId?: string): Promise<TrackedStory> => {
     // Get the session first, then use the token
     const { data } = await supabase.auth.getSession();
@@ -126,6 +127,54 @@ export const storyTrackingService = {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to delete tracked story');
+    }
+  },
+
+  /**
+   * Start polling for a tracked story
+   */
+  startPolling: async (storyId: string): Promise<void> => {
+    // Get the session first, then use the token
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    
+    const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.storyTracking}/start`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+      },
+      body: JSON.stringify({ story_id: storyId })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to start polling');
+    }
+  },
+
+  /**
+   * Stop polling for a tracked story
+   */
+  stopPolling: async (storyId: string): Promise<void> => {
+    // Get the session first, then use the token
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    
+    const response = await fetch(`${config.api.baseUrl}${config.api.endpoints.storyTracking}/stop`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+      },
+      body: JSON.stringify({ story_id: storyId })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to stop polling');
     }
   }
 };

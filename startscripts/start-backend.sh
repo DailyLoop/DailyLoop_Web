@@ -24,7 +24,7 @@ wait_for_backend() {
 }
 
 # Check if required port is available
-check_port 5001 || exit 1  # Backend port
+check_port 8080 || exit 1  # Backend port
 
 # Start backend service
 echo "Starting backend service..."

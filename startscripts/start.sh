@@ -24,7 +24,7 @@ wait_for_backend() {
 }
 
 # Check if required ports are available
-check_port 5001 || exit 1  # Backend port
+check_port 8080 || exit 1  # Backend port
 check_port 5173 || exit 1  # Frontend dev server port
 
 # Start backend service

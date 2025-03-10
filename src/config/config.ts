@@ -1,6 +1,6 @@
 export const config = {
     api: {
-        baseUrl: 'http://localhost:5001',
+        baseUrl: 'http://localhost:8080',
         endpoints: {
             fetchNews: '/api/news/fetch',
             processNews: '/api/news/process',

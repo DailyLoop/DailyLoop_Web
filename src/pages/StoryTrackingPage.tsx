@@ -5,33 +5,39 @@ import StoryTrackingTabContext from '../components/story-tracking/StoryTrackingT
 import AppHeader from '../components/layout/AppHeader';
 import { useStoryTracking } from '../context/StoryTrackingContext';
 import LoadingState from '../components/common/LoadingState';
-import { Play, Pause } from 'lucide-react'; // Import Play and Pause icons
+import { Play, Pause, RefreshCw, AlertCircle } from 'lucide-react';
 
 const StoryTrackingPage: React.FC = () => {
   const { keyword } = useParams<{ keyword: string }>();
   const navigate = useNavigate();
-  const { startTracking, stopTracking, trackedStories } = useStoryTracking();
+  const { startTracking, stopTracking, togglePolling, trackedStories } = useStoryTracking();
   const [isLoading, setIsLoading] = useState(true);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const [isTracking, setIsTracking] = useState(false); // State to manage tracking status
-  const [trackingLoading, setTrackingLoading] = useState(false); // State to manage loading status
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
-  // Handle play/pause button click
-  const handleTrackClick = async () => {
-    if (!keyword) return; // Ensure keyword is defined
+  // Find the story for this keyword
+  const currentStory = keyword ? trackedStories.find(s => s.keyword === keyword) : null;
+  const isPolling = currentStory?.is_polling || false;
+
+  // Toggle polling via context
+  const handleTogglePolling = async () => {
+    if (!currentStory) return;
+    
     setTrackingLoading(true);
     try {
-      if (isTracking) {
-        await stopTracking(keyword);  // ❌ Same issue - passing keyword instead of ID
-        setIsTracking(false);
-      } else {
-        await startTracking(keyword);
-        setIsTracking(true);
-      }
+      await togglePolling(currentStory.id, !isPolling);
+      setStatusMessage(isPolling ? "Automatic updates paused" : "Automatic updates enabled");
     } catch (error) {
-      console.error('Error with story tracking:', error);
+      console.error('Error toggling polling:', error);
+      setStatusMessage("Failed to change update status");
     } finally {
       setTrackingLoading(false);
+      
+      // Clear status message after a delay
+      setTimeout(() => {
+        setStatusMessage(null);
+      }, 3000);
     }
   };
 
@@ -40,37 +46,49 @@ const StoryTrackingPage: React.FC = () => {
     if (keyword) {
       console.log('Starting to track keyword:', keyword);
       
-      // Start tracking and update state
-      startTracking(keyword);
-      setIsTracking(true);
-      
-      // Set a timeout to show a message if articles don't load within 15 seconds
+      // Set up error timeout
       const timeoutId = setTimeout(() => {
         setLoadingTimeout(true);
       }, 15000);
       
+      // Start tracking and update state
+      const setupTracking = async () => {
+        try {
+          await startTracking(keyword);
+        } catch (error) {
+          console.error('Error starting tracking:', error);
+        }
+      };
+      
+      setupTracking();
+      
       return () => {
         clearTimeout(timeoutId);
-        // We intentionally don't stop tracking on unmount to maintain article history
-        // If needed, uncomment below:
-        // stopTracking(keyword);
-        // setIsTracking(false);
       };
     }
-  }, [keyword]); // Remove startTracking from dependencies
+  }, [keyword, startTracking]);
   
   // Update loading state when articles are available
   useEffect(() => {
-    if (keyword && trackedStories.length > 0) {
-      const story = trackedStories.find(s => s.keyword === keyword);
-      if (story && story.articles.length > 0) {
-        setIsLoading(false);
-      }
+    if (currentStory) {
+      setIsLoading(false);
     }
-  }, [keyword, trackedStories]);
+  }, [currentStory]);
 
-  // Find the story for this keyword
-  const currentStory = keyword ? trackedStories.find(s => s.keyword === keyword) : null;
+  // Handle removing this tracked story
+  const handleRemoveTracking = async () => {
+    if (!currentStory) return;
+    
+    setTrackingLoading(true);
+    try {
+      await stopTracking(currentStory.id); // Fixed: Using story ID instead of keyword
+      navigate('/app');
+    } catch (error) {
+      console.error('Error removing tracked story:', error);
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-primary">
@@ -84,20 +102,60 @@ const StoryTrackingPage: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold text-white mb-2">Story Tracking: {keyword}</h1>
             <p className="text-gray-400">Following news and updates about this topic</p>
+            {currentStory && currentStory.last_polled_at && (
+              <p className="text-xs text-gray-500 mt-1">
+                Last updated: {new Date(currentStory.last_polled_at).toLocaleString()}
+              </p>
+            )}
           </div>
-          <button
-            onClick={handleTrackClick}
-            disabled={trackingLoading}
-            className="transition-colors duration-300"
-          >
-            {isTracking ? <Pause className="h-6 w-6 text-blue-500" /> : <Play className="h-6 w-6 text-gray-400" />}
-            {trackingLoading && <span className="ml-1 text-xs text-gray-400">...</span>}
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* Toggle Polling Button */}
+            <button
+              onClick={handleTogglePolling}
+              disabled={trackingLoading || !currentStory}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors duration-300 ${
+                isPolling 
+                  ? "bg-blue-500/20 hover:bg-blue-500/30 text-blue-400" 
+                  : "bg-gray-700/50 hover:bg-gray-700/70 text-gray-300"
+              }`}
+              title={isPolling ? "Disable automatic updates" : "Enable automatic updates"}
+            >
+              {isPolling ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span>Auto-updating</span>
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4" />
+                  <span>Auto-update</span>
+                </>
+              )}
+            </button>
+            
+            {/* Remove tracking button */}
+            <button
+              onClick={handleRemoveTracking}
+              disabled={trackingLoading}
+              className="text-red-400 hover:text-red-300"
+              title="Stop tracking this topic"
+            >
+              Remove
+            </button>
+          </div>
         </div>
+
+        {/* Status message */}
+        {statusMessage && (
+          <div className="mb-4 p-2 bg-blue-500/10 border border-blue-500/30 rounded text-blue-400 text-sm flex items-center">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            {statusMessage}
+          </div>
+        )}
 
         {!keyword ? (
           <div className="text-white p-4 bg-gray-800 rounded-lg">No keyword selected.</div>
-        ) : currentStory && currentStory.articles.length > 0 ? (
+        ) : currentStory ? (
           <StoryTrackingTabContext keyword={keyword} />
         ) : (
           <div className="p-8 text-center">
