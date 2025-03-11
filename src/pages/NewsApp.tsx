@@ -31,7 +31,17 @@ const NewsApp: React.FC = () => {
     const tokens = query.split(/\s+/).filter(Boolean);
     setSelectedKeywords((prev) => {
       const merged = new Set([...prev, ...tokens]);
-      return Array.from(merged);
+      // return Array.from(merged);
+
+      const mergedArray = Array.from(merged);
+      // Check if keywords are actually different
+      if (
+        mergedArray.length === prev.length &&
+        mergedArray.every((kw, i) => kw === prev[i])
+      ) {
+        return prev; // No state update needed
+      }
+      return mergedArray;
     });
   };
 
@@ -126,6 +136,7 @@ const NewsApp: React.FC = () => {
   };
 
   useEffect(() => {
+    if (selectedKeywords.length === 0) return;
     performSearch(selectedKeywords);
   }, [selectedKeywords]);
 

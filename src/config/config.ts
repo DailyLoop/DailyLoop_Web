@@ -1,6 +1,7 @@
 export const config = {
     api: {
         baseUrl: 'http://localhost:8080',
+        // baseUrl: 'https://dailylooppy-backend-99775608725.us-central1.run.app',
         endpoints: {
             fetchNews: '/api/news/fetch',
             processNews: '/api/news/process',

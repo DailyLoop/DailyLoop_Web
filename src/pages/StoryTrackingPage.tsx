@@ -66,7 +66,7 @@ const StoryTrackingPage: React.FC = () => {
         clearTimeout(timeoutId);
       };
     }
-  }, [keyword, startTracking]);
+  }, [keyword]);
   
   // Update loading state when articles are available
   useEffect(() => {
