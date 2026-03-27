@@ -61,11 +61,15 @@ const NewsApp: React.FC = () => {
 
     try {
       const sessionId = SessionService.getSessionId();
-      
+
       // Build the fetch URL including keyword and session_id
       const fetchUrl = `${config.api.baseUrl}${config.api.endpoints.fetchNews}?keyword=${encodeURIComponent(finalQuery)}&session_id=${sessionId}`;
 
-      const fetchResponse = await fetch(fetchUrl);
+      const fetchResponse = await fetch(fetchUrl, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        }
+      });
       if (!fetchResponse.ok) {
         throw new Error("Failed to fetch news");
       }
@@ -73,22 +77,17 @@ const NewsApp: React.FC = () => {
       // Get the article IDs from the fetch response
       const { data: articleIds } = await fetchResponse.json();
 
+      // Handle empty results
+      if (!articleIds || articleIds.length === 0) {
+        setError("No articles found for this topic. Try a different keyword.");
+        setHasSearched(false);
+        setShowShimmer(false);
+        setIsTransitioning(false);
+        return;
+      }
+
       // Call the process endpoint with session_id in query params and article_ids in request body
       const processUrl = `${config.api.baseUrl}${config.api.endpoints.processNews}?session_id=${sessionId}`;
-      
-      // // Prepare request headers, including Authorization if user is logged in
-      // const headers: Record<string, string> = {
-      //   "Content-Type": "application/json"
-      // };
-      
-      // // Add JWT token if user is logged in
-      // if (user && localStorage.getItem('authToken')) {
-      //   headers['Authorization'] = `Bearer ${localStorage.getItem('authToken')}`;
-      // }
-      
-      // console.log("Request headers:", headers);
-      // console.log(localStorage.getItem('authToken'));
-      // console.log("User:", user);
 
 
 

@@ -71,13 +71,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       console.log('[AuthContext] 📥 Initial session retrieved');
-      dispatch({ 
-        type: 'SET_AUTH', 
-        user: session?.user ?? null, 
-        token: session?.access_token ?? null 
+      dispatch({
+        type: 'SET_AUTH',
+        user: session?.user ?? null,
+        token: session?.access_token ?? null
       });
       sessionChecked = true;
       markInitialized();
+    }).catch((error) => {
+      console.error('[AuthContext] ❌ Error getting session:', error);
+      if (mounted) {
+        sessionChecked = true;
+        markInitialized();
+      }
     });
 
     // Auth state change listener

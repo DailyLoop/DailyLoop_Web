@@ -61,13 +61,7 @@ const StoryTrackingTabContext: React.FC<StoryTrackingTabContextProps> = ({ keywo
       //   addArticlesToStory(story.id, [testArticle]);
       // }
       
-      // select random words from an array to simulate a keyword
-      const randomWords = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape'];
-      const randomKeyword = randomWords[Math.floor(Math.random() * randomWords.length)];
-      // add random keyword to the keyword
-      console.log('Random keyword:', randomKeyword);
-      // const encodedKeyword = encodeURIComponent(`${keyword} ${randomKeyword}`).replace(/%20/g, '+');
-      const encodedKeyword = encodeURIComponent(`${randomKeyword}`).replace(/%20/g, '+');
+      const encodedKeyword = encodeURIComponent(keyword).replace(/%20/g, '+');
 
       //////////////////////////////////////////
 

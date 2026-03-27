@@ -112,7 +112,7 @@ const AuthPage: React.FC = () => {
             <div className="p-3 bg-blue-500 rounded-xl">
               <Newspaper className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-white font-playfair">NewsFlow</h1>
+            <h1 className="text-4xl font-bold text-white font-playfair">DailyLoop</h1>
           </div>
           <p className="text-xl text-gray-300 mb-8 font-inter leading-relaxed">
             Your personalized news aggregator. Stay informed with curated content from trusted sources.
@@ -141,7 +141,7 @@ const AuthPage: React.FC = () => {
             <div className="p-2 bg-blue-500 rounded-lg">
               <Newspaper className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white">NewsFlow</h1>
+            <h1 className="text-2xl font-bold text-white">DailyLoop</h1>
           </div>
 
           <h2 className="text-3xl font-bold text-white mb-2 font-playfair">
